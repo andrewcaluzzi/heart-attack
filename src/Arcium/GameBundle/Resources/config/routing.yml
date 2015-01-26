@@ -1,0 +1,3 @@
+arcium_game_index:
+    path:     /
+    defaults: { _controller: ArciumGameBundle:Game:index }

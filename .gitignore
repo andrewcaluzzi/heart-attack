@@ -1,0 +1,6 @@
+.idea/*
+app/bootstrap*
+app/cache/*
+app/logs/*
+web/bundles/*
+vendor/*

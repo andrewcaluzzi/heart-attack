@@ -1,0 +1,4 @@
+arcium_game:
+    resource: "@ArciumGameBundle/Resources/config/routing.yml"
+    prefix:   /
+    #type: annotation ### COULD USE THIS INSTEAD OF ROUTING FILE? APC

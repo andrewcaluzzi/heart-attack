@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_driver: pdo_mysql
+    database_host: tenspeed-db.ciqtsyjzxpbm.ap-southeast-2.rds.amazonaws.com
+    database_port: null
+    database_name: heartattack
+    database_user: root
+    database_password: rootroot
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    locale: en
+    secret: 157c8b1c10bdc4bf7e45a7fb50a320b044b870d3

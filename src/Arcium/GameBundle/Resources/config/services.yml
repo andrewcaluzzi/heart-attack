@@ -1,0 +1,3 @@
+services:
+    gamemanager:
+        class: Arcium\GameBundle\Services\GameManager

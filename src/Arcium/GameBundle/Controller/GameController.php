@@ -14,25 +14,28 @@ class GameController extends Controller
      */
     public function indexAction()
     {
-        $player = Model\PlayerPeer::retrieveByPK(1);
         $game = Model\GamePeer::retrieveByPK(1);
-        $turn = Model\TurnPeer::retrieveByPK(1);
+        $playerOne = $game->getPlayerOneObject();
+        $playerTwo = $game->getPlayerTwoObject();
+        $history = array();
 
         /** @var $gm Services\GameManager */
         $gm = $this->get('gamemanager');
-        $cards = $gm->getCardString(array('Ah', '7c', '2c', '5c'));
-        $turn->setCards($cards);
+
+        $startingCards = $gm->getFullDeck($gm->getStartingCards());
+        $game->initialiseDeck($startingCards);
+        $history[] = "Started game with deck " . implode(', ',$game->getDeck());
+        $game->setPlayerOneHand($game->draw(5));
+        $game->setPlayerTwoHand($game->draw(5));
+
+        ## TODO: how to handle hearts separate to normal cards? new field in games table?
+
+        $history[] = "Player One: " . $playerOne->getName() . " starts with hand " . implode(', ', $game->getPlayerOneHand());
+        $history[] = "Player Two: " . $playerTwo->getName() . " starts with hand " . implode(', ', $game->getPlayerTwoHand());
+        $history[] = "Deck is now " . implode(', ', $game->getDeck());
 
         ## Reminder: use [php app/console server:run localhost] for quick ad-hoc server
-        ## TODO - write drawCard() function in Game object
-        ## TODO - maintain draw pile, as a string? needs to be saved in Game object
 
-        return $this->render('ArciumGameBundle:Default:index.html.twig',
-            array(
-                'player' => $player,
-                'game'   => $game,
-                'turn'   => $turn
-            )
-        );
+        return $this->render('ArciumGameBundle:Default:index.html.twig', array('history' => $history));
     }
 }

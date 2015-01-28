@@ -3,6 +3,25 @@
 <database name="default" namespace="Arcium\GameBundle\Model" defaultIdMethod="native">
   <table name="games" phpName="Game" idMethod="native">
     <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="deck" phpName="Deck" type="LONGVARCHAR" required="false"/>
+    <column name="discard" phpName="Discard" type="LONGVARCHAR" required="false"/>
+    <column name="shop" phpName="Shop" type="LONGVARCHAR" required="false"/>
+    <column name="playerOne" phpName="Playerone" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <column name="playerOneHand" phpName="Playeronehand" type="LONGVARCHAR" required="false"/>
+    <column name="playerTwo" phpName="Playertwo" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
+    <column name="playerTwoHand" phpName="Playertwohand" type="LONGVARCHAR" required="false"/>
+    <foreign-key foreignTable="players" name="fk_playerOne" onDelete="RESTRICT" onUpdate="CASCADE">
+      <reference local="playerOne" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="players" name="fk_playerTwo" onDelete="RESTRICT" onUpdate="CASCADE">
+      <reference local="playerTwo" foreign="id"/>
+    </foreign-key>
+    <index name="fk_playerOne">
+      <index-column name="playerOne"/>
+    </index>
+    <index name="fk_playerTwo_idx">
+      <index-column name="playerTwo"/>
+    </index>
     <vendor type="mysql">
       <parameter name="Engine" value="InnoDB"/>
     </vendor>
@@ -24,7 +43,7 @@
   <table name="turns" phpName="Turn" idMethod="native">
     <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="game_id" phpName="GameId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
-    <column name="player_id" phpName="PlayerId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <column name="player_id" phpName="PlayerId" type="INTEGER" size="10" sqlType="int(10) unsigned" required="true"/>
     <column name="phase" phpName="Phase" type="CHAR" sqlType="enum('SETUP','ATTACK','SHOP','CLEANUP')" required="true"/>
     <column name="cards" phpName="Cards" type="VARCHAR" size="100" required="false"/>
     <foreign-key foreignTable="games" name="fk_game" onDelete="RESTRICT" onUpdate="CASCADE">

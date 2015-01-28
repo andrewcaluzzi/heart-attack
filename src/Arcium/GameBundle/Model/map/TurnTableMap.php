@@ -44,7 +44,7 @@ class TurnTableMap extends TableMap
         // columns
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, 10, null);
         $this->addForeignKey('game_id', 'GameId', 'INTEGER', 'games', 'id', true, 10, null);
-        $this->addForeignKey('player_id', 'PlayerId', 'INTEGER', 'players', 'id', true, null, null);
+        $this->addForeignKey('player_id', 'PlayerId', 'INTEGER', 'players', 'id', true, 10, null);
         $this->addColumn('phase', 'Phase', 'CHAR', true, null, null);
         $this->getColumn('phase', false)->setValueSet(array (
   0 => 'SETUP',

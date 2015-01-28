@@ -1,3 +1,5 @@
-{{ game }}<br/><br/>
-{{ player }}<br/><br/>
-{{ turn }}<br/><br/>
+<ul>
+{% for item in history %}
+  <li>{{ item }}</li>
+{% endfor %}
+</ul>

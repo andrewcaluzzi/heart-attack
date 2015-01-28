@@ -18,14 +18,42 @@ class GameManager
     );
 
     // player one's starting heart set
-    private static $startingHeartSetOne = array(
-        '2h', '5h', '6h', '9h', '10h', 'K10'
+    public static $startingHeartSetOne = array(
+        '2h', '5h', '6h', '9h', '10h', 'Kh'
     );
 
     // player two's starting heart set
-    private static $startingHeartSetTwo = array(
+    public static $startingHeartSetTwo = array(
         '3h', '4h', '7h', '8h', 'Jh', 'Qh'
     );
+
+    /**
+     * @param array $exclusions Any cards to remove from the deck before returning
+     * @return array An array representing a full deck in the format Xy where X is the card name and y is the card suit
+     *               eg. array('Ah', 'Kh', ...
+     */
+    public static function getFullDeck($exclusions = array())
+    {
+        $deck = array();
+
+        foreach(self::$cardNames as $nameLetter => $name)
+        {
+            foreach(self::$cardSuits as $suitLetter => $suit)
+            {
+                $deck[] = $nameLetter . $suitLetter;
+            }
+        }
+
+        return array_diff($deck, $exclusions);
+    }
+
+    /**
+     * @return array An array of starting cards to be excluded from the deck
+     */
+    public static function getStartingCards()
+    {
+        return array_merge(self::$startingHeartSetOne, self::$startingHeartSetTwo);
+    }
 
     /**
      * @param $card A card in the format Xy where X is the card name and y is the card suit

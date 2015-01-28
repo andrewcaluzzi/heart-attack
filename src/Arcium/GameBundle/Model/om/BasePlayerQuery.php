@@ -12,6 +12,7 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use Arcium\GameBundle\Model\Game;
 use Arcium\GameBundle\Model\Player;
 use Arcium\GameBundle\Model\PlayerPeer;
 use Arcium\GameBundle\Model\PlayerQuery;
@@ -29,6 +30,14 @@ use Arcium\GameBundle\Model\Turn;
  * @method PlayerQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method PlayerQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method PlayerQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ *
+ * @method PlayerQuery leftJoinGameRelatedByPlayerone($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByPlayerone relation
+ * @method PlayerQuery rightJoinGameRelatedByPlayerone($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByPlayerone relation
+ * @method PlayerQuery innerJoinGameRelatedByPlayerone($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByPlayerone relation
+ *
+ * @method PlayerQuery leftJoinGameRelatedByPlayertwo($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByPlayertwo relation
+ * @method PlayerQuery rightJoinGameRelatedByPlayertwo($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByPlayertwo relation
+ * @method PlayerQuery innerJoinGameRelatedByPlayertwo($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByPlayertwo relation
  *
  * @method PlayerQuery leftJoinTurn($relationAlias = null) Adds a LEFT JOIN clause to the query using the Turn relation
  * @method PlayerQuery rightJoinTurn($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Turn relation
@@ -335,6 +344,154 @@ abstract class BasePlayerQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(PlayerPeer::USERNAME, $username, $comparison);
+    }
+
+    /**
+     * Filter the query by a related Game object
+     *
+     * @param   Game|PropelObjectCollection $game  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 PlayerQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByGameRelatedByPlayerone($game, $comparison = null)
+    {
+        if ($game instanceof Game) {
+            return $this
+                ->addUsingAlias(PlayerPeer::ID, $game->getPlayerone(), $comparison);
+        } elseif ($game instanceof PropelObjectCollection) {
+            return $this
+                ->useGameRelatedByPlayeroneQuery()
+                ->filterByPrimaryKeys($game->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByGameRelatedByPlayerone() only accepts arguments of type Game or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the GameRelatedByPlayerone relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return PlayerQuery The current query, for fluid interface
+     */
+    public function joinGameRelatedByPlayerone($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('GameRelatedByPlayerone');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'GameRelatedByPlayerone');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the GameRelatedByPlayerone relation Game object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
+     */
+    public function useGameRelatedByPlayeroneQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinGameRelatedByPlayerone($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByPlayerone', '\Arcium\GameBundle\Model\GameQuery');
+    }
+
+    /**
+     * Filter the query by a related Game object
+     *
+     * @param   Game|PropelObjectCollection $game  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 PlayerQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByGameRelatedByPlayertwo($game, $comparison = null)
+    {
+        if ($game instanceof Game) {
+            return $this
+                ->addUsingAlias(PlayerPeer::ID, $game->getPlayertwo(), $comparison);
+        } elseif ($game instanceof PropelObjectCollection) {
+            return $this
+                ->useGameRelatedByPlayertwoQuery()
+                ->filterByPrimaryKeys($game->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByGameRelatedByPlayertwo() only accepts arguments of type Game or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the GameRelatedByPlayertwo relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return PlayerQuery The current query, for fluid interface
+     */
+    public function joinGameRelatedByPlayertwo($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('GameRelatedByPlayertwo');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'GameRelatedByPlayertwo');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the GameRelatedByPlayertwo relation Game object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
+     */
+    public function useGameRelatedByPlayertwoQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinGameRelatedByPlayertwo($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByPlayertwo', '\Arcium\GameBundle\Model\GameQuery');
     }
 
     /**

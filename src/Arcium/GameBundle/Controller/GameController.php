@@ -21,20 +21,35 @@ class GameController extends Controller
 
         /** @var $gm Services\GameManager */
         $gm = $this->get('gamemanager');
+        $displayCards = function($cards) { return implode(', ', $cards); };
 
         $startingCards = $gm->getFullDeck($gm->getStartingCards());
+        $history[] = "Unshuffled deck: " . $displayCards($startingCards);
         $game->initialiseDeck($startingCards);
-        $history[] = "Started game with deck " . implode(', ',$game->getDeck());
-        $game->setPlayerOneHand($game->draw(5));
-        $game->setPlayerTwoHand($game->draw(5));
+        $history[] = "Shuffled deck:   " . $displayCards($game->getDeck());
+        $game->setPlayerOneHand(array());
+        $game->setPlayerTwoHand(array());
+
+        $game->drawCardsForPlayerOne(5);
+        $game->drawCardsForPlayerTwo(5);
 
         ## TODO: how to handle hearts separate to normal cards? new field in games table?
 
-        $history[] = "Player One: " . $playerOne->getName() . " starts with hand " . implode(', ', $game->getPlayerOneHand());
-        $history[] = "Player Two: " . $playerTwo->getName() . " starts with hand " . implode(', ', $game->getPlayerTwoHand());
-        $history[] = "Deck is now " . implode(', ', $game->getDeck());
+        $history[] = "Player One: " . $playerOne->getName() . " starts with hand " . $displayCards($game->getPlayerOneHand());
+        $history[] = "Player Two: " . $playerTwo->getName() . " starts with hand " . $displayCards($game->getPlayerTwoHand());
+        $history[] = "Deck is now " . $displayCards($game->getDeck());
 
-        ## Reminder: use [php app/console server:run localhost] for quick ad-hoc server
+        /**
+         * Turn anatomy
+         *
+         * Phase 1: SETUP
+         *
+         * Phase 2: ATTACK
+         *
+         * Phase 3: SHOP
+         *
+         * Phase 4: CLEANUP
+         */
 
         return $this->render('ArciumGameBundle:Default:index.html.twig', array('history' => $history));
     }

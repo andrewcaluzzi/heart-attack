@@ -24,8 +24,15 @@ class Deck
     public function __construct(array $cards)
     {
         ## TODO: some validation?
-        shuffle($cards);
         $this->cards = $cards;
+    }
+
+    /**
+     * Shuffles the deck
+     */
+    public function shuffle()
+    {
+        shuffle($this->cards);
     }
 
     /**

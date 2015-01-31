@@ -9,7 +9,9 @@ use \Exception;
 use \PDO;
 use \Persistent;
 use \Propel;
+use \PropelCollection;
 use \PropelException;
+use \PropelObjectCollection;
 use \PropelPDO;
 use Arcium\GameBundle\Model\Game;
 use Arcium\GameBundle\Model\GameQuery;
@@ -73,12 +75,18 @@ abstract class BaseTurn extends BaseObject implements Persistent
     /**
      * @var        Game
      */
-    protected $aGame;
+    protected $aGameRelatedByGameId;
 
     /**
      * @var        Player
      */
     protected $aPlayer;
+
+    /**
+     * @var        PropelObjectCollection|Game[] Collection to store aggregation of Game objects.
+     */
+    protected $collGamesRelatedByLastTurn;
+    protected $collGamesRelatedByLastTurnPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -99,6 +107,12 @@ abstract class BaseTurn extends BaseObject implements Persistent
      * @var        boolean
      */
     protected $alreadyInClearAllReferencesDeep = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
+    protected $gamesRelatedByLastTurnScheduledForDeletion = null;
 
     /**
      * Get the [id] column value.
@@ -193,8 +207,8 @@ abstract class BaseTurn extends BaseObject implements Persistent
             $this->modifiedColumns[] = TurnPeer::GAME_ID;
         }
 
-        if ($this->aGame !== null && $this->aGame->getId() !== $v) {
-            $this->aGame = null;
+        if ($this->aGameRelatedByGameId !== null && $this->aGameRelatedByGameId->getId() !== $v) {
+            $this->aGameRelatedByGameId = null;
         }
 
 
@@ -337,8 +351,8 @@ abstract class BaseTurn extends BaseObject implements Persistent
     public function ensureConsistency()
     {
 
-        if ($this->aGame !== null && $this->game_id !== $this->aGame->getId()) {
-            $this->aGame = null;
+        if ($this->aGameRelatedByGameId !== null && $this->game_id !== $this->aGameRelatedByGameId->getId()) {
+            $this->aGameRelatedByGameId = null;
         }
         if ($this->aPlayer !== null && $this->player_id !== $this->aPlayer->getId()) {
             $this->aPlayer = null;
@@ -382,8 +396,10 @@ abstract class BaseTurn extends BaseObject implements Persistent
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aGame = null;
+            $this->aGameRelatedByGameId = null;
             $this->aPlayer = null;
+            $this->collGamesRelatedByLastTurn = null;
+
         } // if (deep)
     }
 
@@ -502,11 +518,11 @@ abstract class BaseTurn extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aGame !== null) {
-                if ($this->aGame->isModified() || $this->aGame->isNew()) {
-                    $affectedRows += $this->aGame->save($con);
+            if ($this->aGameRelatedByGameId !== null) {
+                if ($this->aGameRelatedByGameId->isModified() || $this->aGameRelatedByGameId->isNew()) {
+                    $affectedRows += $this->aGameRelatedByGameId->save($con);
                 }
-                $this->setGame($this->aGame);
+                $this->setGameRelatedByGameId($this->aGameRelatedByGameId);
             }
 
             if ($this->aPlayer !== null) {
@@ -525,6 +541,24 @@ abstract class BaseTurn extends BaseObject implements Persistent
                 }
                 $affectedRows += 1;
                 $this->resetModified();
+            }
+
+            if ($this->gamesRelatedByLastTurnScheduledForDeletion !== null) {
+                if (!$this->gamesRelatedByLastTurnScheduledForDeletion->isEmpty()) {
+                    foreach ($this->gamesRelatedByLastTurnScheduledForDeletion as $gameRelatedByLastTurn) {
+                        // need to save related object because we set the relation to null
+                        $gameRelatedByLastTurn->save($con);
+                    }
+                    $this->gamesRelatedByLastTurnScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collGamesRelatedByLastTurn !== null) {
+                foreach ($this->collGamesRelatedByLastTurn as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             $this->alreadyInSave = false;
@@ -693,9 +727,9 @@ abstract class BaseTurn extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aGame !== null) {
-                if (!$this->aGame->validate($columns)) {
-                    $failureMap = array_merge($failureMap, $this->aGame->getValidationFailures());
+            if ($this->aGameRelatedByGameId !== null) {
+                if (!$this->aGameRelatedByGameId->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aGameRelatedByGameId->getValidationFailures());
                 }
             }
 
@@ -710,6 +744,14 @@ abstract class BaseTurn extends BaseObject implements Persistent
                 $failureMap = array_merge($failureMap, $retval);
             }
 
+
+                if ($this->collGamesRelatedByLastTurn !== null) {
+                    foreach ($this->collGamesRelatedByLastTurn as $referrerFK) {
+                        if (!$referrerFK->validate($columns)) {
+                            $failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+                        }
+                    }
+                }
 
 
             $this->alreadyInValidation = false;
@@ -802,11 +844,14 @@ abstract class BaseTurn extends BaseObject implements Persistent
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aGame) {
-                $result['Game'] = $this->aGame->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aGameRelatedByGameId) {
+                $result['GameRelatedByGameId'] = $this->aGameRelatedByGameId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->aPlayer) {
                 $result['Player'] = $this->aPlayer->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collGamesRelatedByLastTurn) {
+                $result['GamesRelatedByLastTurn'] = $this->collGamesRelatedByLastTurn->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -977,6 +1022,12 @@ abstract class BaseTurn extends BaseObject implements Persistent
             // store object hash to prevent cycle
             $this->startCopy = true;
 
+            foreach ($this->getGamesRelatedByLastTurn() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addGameRelatedByLastTurn($relObj->copy($deepCopy));
+                }
+            }
+
             //unflag object copy
             $this->startCopy = false;
         } // if ($deepCopy)
@@ -1034,7 +1085,7 @@ abstract class BaseTurn extends BaseObject implements Persistent
      * @return Turn The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setGame(Game $v = null)
+    public function setGameRelatedByGameId(Game $v = null)
     {
         if ($v === null) {
             $this->setGameId(NULL);
@@ -1042,12 +1093,12 @@ abstract class BaseTurn extends BaseObject implements Persistent
             $this->setGameId($v->getId());
         }
 
-        $this->aGame = $v;
+        $this->aGameRelatedByGameId = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the Game object, it will not be re-added.
         if ($v !== null) {
-            $v->addTurn($this);
+            $v->addTurnRelatedByGameId($this);
         }
 
 
@@ -1063,20 +1114,20 @@ abstract class BaseTurn extends BaseObject implements Persistent
      * @return Game The associated Game object.
      * @throws PropelException
      */
-    public function getGame(PropelPDO $con = null, $doQuery = true)
+    public function getGameRelatedByGameId(PropelPDO $con = null, $doQuery = true)
     {
-        if ($this->aGame === null && ($this->game_id !== null) && $doQuery) {
-            $this->aGame = GameQuery::create()->findPk($this->game_id, $con);
+        if ($this->aGameRelatedByGameId === null && ($this->game_id !== null) && $doQuery) {
+            $this->aGameRelatedByGameId = GameQuery::create()->findPk($this->game_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aGame->addTurns($this);
+                $this->aGameRelatedByGameId->addTurnsRelatedByGameId($this);
              */
         }
 
-        return $this->aGame;
+        return $this->aGameRelatedByGameId;
     }
 
     /**
@@ -1131,6 +1182,297 @@ abstract class BaseTurn extends BaseObject implements Persistent
         return $this->aPlayer;
     }
 
+
+    /**
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
+     *
+     * @param string $relationName The name of the relation to initialize
+     * @return void
+     */
+    public function initRelation($relationName)
+    {
+        if ('GameRelatedByLastTurn' == $relationName) {
+            $this->initGamesRelatedByLastTurn();
+        }
+    }
+
+    /**
+     * Clears out the collGamesRelatedByLastTurn collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return Turn The current object (for fluent API support)
+     * @see        addGamesRelatedByLastTurn()
+     */
+    public function clearGamesRelatedByLastTurn()
+    {
+        $this->collGamesRelatedByLastTurn = null; // important to set this to null since that means it is uninitialized
+        $this->collGamesRelatedByLastTurnPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * reset is the collGamesRelatedByLastTurn collection loaded partially
+     *
+     * @return void
+     */
+    public function resetPartialGamesRelatedByLastTurn($v = true)
+    {
+        $this->collGamesRelatedByLastTurnPartial = $v;
+    }
+
+    /**
+     * Initializes the collGamesRelatedByLastTurn collection.
+     *
+     * By default this just sets the collGamesRelatedByLastTurn collection to an empty array (like clearcollGamesRelatedByLastTurn());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initGamesRelatedByLastTurn($overrideExisting = true)
+    {
+        if (null !== $this->collGamesRelatedByLastTurn && !$overrideExisting) {
+            return;
+        }
+        $this->collGamesRelatedByLastTurn = new PropelObjectCollection();
+        $this->collGamesRelatedByLastTurn->setModel('Game');
+    }
+
+    /**
+     * Gets an array of Game objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this Turn is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @return PropelObjectCollection|Game[] List of Game objects
+     * @throws PropelException
+     */
+    public function getGamesRelatedByLastTurn($criteria = null, PropelPDO $con = null)
+    {
+        $partial = $this->collGamesRelatedByLastTurnPartial && !$this->isNew();
+        if (null === $this->collGamesRelatedByLastTurn || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collGamesRelatedByLastTurn) {
+                // return empty collection
+                $this->initGamesRelatedByLastTurn();
+            } else {
+                $collGamesRelatedByLastTurn = GameQuery::create(null, $criteria)
+                    ->filterByTurnRelatedByLastTurn($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    if (false !== $this->collGamesRelatedByLastTurnPartial && count($collGamesRelatedByLastTurn)) {
+                      $this->initGamesRelatedByLastTurn(false);
+
+                      foreach ($collGamesRelatedByLastTurn as $obj) {
+                        if (false == $this->collGamesRelatedByLastTurn->contains($obj)) {
+                          $this->collGamesRelatedByLastTurn->append($obj);
+                        }
+                      }
+
+                      $this->collGamesRelatedByLastTurnPartial = true;
+                    }
+
+                    $collGamesRelatedByLastTurn->getInternalIterator()->rewind();
+
+                    return $collGamesRelatedByLastTurn;
+                }
+
+                if ($partial && $this->collGamesRelatedByLastTurn) {
+                    foreach ($this->collGamesRelatedByLastTurn as $obj) {
+                        if ($obj->isNew()) {
+                            $collGamesRelatedByLastTurn[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collGamesRelatedByLastTurn = $collGamesRelatedByLastTurn;
+                $this->collGamesRelatedByLastTurnPartial = false;
+            }
+        }
+
+        return $this->collGamesRelatedByLastTurn;
+    }
+
+    /**
+     * Sets a collection of GameRelatedByLastTurn objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $gamesRelatedByLastTurn A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return Turn The current object (for fluent API support)
+     */
+    public function setGamesRelatedByLastTurn(PropelCollection $gamesRelatedByLastTurn, PropelPDO $con = null)
+    {
+        $gamesRelatedByLastTurnToDelete = $this->getGamesRelatedByLastTurn(new Criteria(), $con)->diff($gamesRelatedByLastTurn);
+
+
+        $this->gamesRelatedByLastTurnScheduledForDeletion = $gamesRelatedByLastTurnToDelete;
+
+        foreach ($gamesRelatedByLastTurnToDelete as $gameRelatedByLastTurnRemoved) {
+            $gameRelatedByLastTurnRemoved->setTurnRelatedByLastTurn(null);
+        }
+
+        $this->collGamesRelatedByLastTurn = null;
+        foreach ($gamesRelatedByLastTurn as $gameRelatedByLastTurn) {
+            $this->addGameRelatedByLastTurn($gameRelatedByLastTurn);
+        }
+
+        $this->collGamesRelatedByLastTurn = $gamesRelatedByLastTurn;
+        $this->collGamesRelatedByLastTurnPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related Game objects.
+     *
+     * @param Criteria $criteria
+     * @param boolean $distinct
+     * @param PropelPDO $con
+     * @return int             Count of related Game objects.
+     * @throws PropelException
+     */
+    public function countGamesRelatedByLastTurn(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        $partial = $this->collGamesRelatedByLastTurnPartial && !$this->isNew();
+        if (null === $this->collGamesRelatedByLastTurn || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collGamesRelatedByLastTurn) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getGamesRelatedByLastTurn());
+            }
+            $query = GameQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByTurnRelatedByLastTurn($this)
+                ->count($con);
+        }
+
+        return count($this->collGamesRelatedByLastTurn);
+    }
+
+    /**
+     * Method called to associate a Game object to this object
+     * through the Game foreign key attribute.
+     *
+     * @param    Game $l Game
+     * @return Turn The current object (for fluent API support)
+     */
+    public function addGameRelatedByLastTurn(Game $l)
+    {
+        if ($this->collGamesRelatedByLastTurn === null) {
+            $this->initGamesRelatedByLastTurn();
+            $this->collGamesRelatedByLastTurnPartial = true;
+        }
+
+        if (!in_array($l, $this->collGamesRelatedByLastTurn->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
+            $this->doAddGameRelatedByLastTurn($l);
+
+            if ($this->gamesRelatedByLastTurnScheduledForDeletion and $this->gamesRelatedByLastTurnScheduledForDeletion->contains($l)) {
+                $this->gamesRelatedByLastTurnScheduledForDeletion->remove($this->gamesRelatedByLastTurnScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	GameRelatedByLastTurn $gameRelatedByLastTurn The gameRelatedByLastTurn object to add.
+     */
+    protected function doAddGameRelatedByLastTurn($gameRelatedByLastTurn)
+    {
+        $this->collGamesRelatedByLastTurn[]= $gameRelatedByLastTurn;
+        $gameRelatedByLastTurn->setTurnRelatedByLastTurn($this);
+    }
+
+    /**
+     * @param	GameRelatedByLastTurn $gameRelatedByLastTurn The gameRelatedByLastTurn object to remove.
+     * @return Turn The current object (for fluent API support)
+     */
+    public function removeGameRelatedByLastTurn($gameRelatedByLastTurn)
+    {
+        if ($this->getGamesRelatedByLastTurn()->contains($gameRelatedByLastTurn)) {
+            $this->collGamesRelatedByLastTurn->remove($this->collGamesRelatedByLastTurn->search($gameRelatedByLastTurn));
+            if (null === $this->gamesRelatedByLastTurnScheduledForDeletion) {
+                $this->gamesRelatedByLastTurnScheduledForDeletion = clone $this->collGamesRelatedByLastTurn;
+                $this->gamesRelatedByLastTurnScheduledForDeletion->clear();
+            }
+            $this->gamesRelatedByLastTurnScheduledForDeletion[]= $gameRelatedByLastTurn;
+            $gameRelatedByLastTurn->setTurnRelatedByLastTurn(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Turn is new, it will return
+     * an empty collection; or if this Turn has previously
+     * been saved, it will retrieve related GamesRelatedByLastTurn from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Turn.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @param string $join_behavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return PropelObjectCollection|Game[] List of Game objects
+     */
+    public function getGamesRelatedByLastTurnJoinPlayerRelatedByPlayerOne($criteria = null, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $query = GameQuery::create(null, $criteria);
+        $query->joinWith('PlayerRelatedByPlayerOne', $join_behavior);
+
+        return $this->getGamesRelatedByLastTurn($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Turn is new, it will return
+     * an empty collection; or if this Turn has previously
+     * been saved, it will retrieve related GamesRelatedByLastTurn from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Turn.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @param string $join_behavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return PropelObjectCollection|Game[] List of Game objects
+     */
+    public function getGamesRelatedByLastTurnJoinPlayerRelatedByPlayerTwo($criteria = null, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $query = GameQuery::create(null, $criteria);
+        $query->joinWith('PlayerRelatedByPlayerTwo', $join_behavior);
+
+        return $this->getGamesRelatedByLastTurn($query, $con);
+    }
+
     /**
      * Clears the current object and sets all attributes to their default values
      */
@@ -1163,8 +1505,13 @@ abstract class BaseTurn extends BaseObject implements Persistent
     {
         if ($deep && !$this->alreadyInClearAllReferencesDeep) {
             $this->alreadyInClearAllReferencesDeep = true;
-            if ($this->aGame instanceof Persistent) {
-              $this->aGame->clearAllReferences($deep);
+            if ($this->collGamesRelatedByLastTurn) {
+                foreach ($this->collGamesRelatedByLastTurn as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+            if ($this->aGameRelatedByGameId instanceof Persistent) {
+              $this->aGameRelatedByGameId->clearAllReferences($deep);
             }
             if ($this->aPlayer instanceof Persistent) {
               $this->aPlayer->clearAllReferences($deep);
@@ -1173,7 +1520,11 @@ abstract class BaseTurn extends BaseObject implements Persistent
             $this->alreadyInClearAllReferencesDeep = false;
         } // if ($deep)
 
-        $this->aGame = null;
+        if ($this->collGamesRelatedByLastTurn instanceof PropelCollection) {
+            $this->collGamesRelatedByLastTurn->clearIterator();
+        }
+        $this->collGamesRelatedByLastTurn = null;
+        $this->aGameRelatedByGameId = null;
         $this->aPlayer = null;
     }
 

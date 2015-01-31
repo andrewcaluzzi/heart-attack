@@ -1,3 +1,4 @@
-services:
-    gamemanager:
-        class: Arcium\GameBundle\Services\GameManager
+#services:
+#    gamemanager:
+#        class: Arcium\GameBundle\Services\GameManager
+#        arguments: ["%game%", "%playerOneHand%", "%playerTwoHand%"]

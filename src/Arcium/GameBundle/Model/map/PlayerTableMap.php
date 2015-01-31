@@ -53,8 +53,8 @@ class PlayerTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('GameRelatedByPlayerone', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'playerOne', ), null, 'CASCADE', 'GamesRelatedByPlayerone');
-        $this->addRelation('GameRelatedByPlayertwo', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'playerTwo', ), null, 'CASCADE', 'GamesRelatedByPlayertwo');
+        $this->addRelation('GameRelatedByPlayerOne', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'player_one', ), null, 'CASCADE', 'GamesRelatedByPlayerOne');
+        $this->addRelation('GameRelatedByPlayerTwo', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'player_two', ), null, 'CASCADE', 'GamesRelatedByPlayerTwo');
         $this->addRelation('Turn', 'Arcium\\GameBundle\\Model\\Turn', RelationMap::ONE_TO_MANY, array('id' => 'player_id', ), null, 'CASCADE', 'Turns');
     } // buildRelations()
 

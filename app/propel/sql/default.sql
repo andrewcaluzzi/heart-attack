@@ -15,19 +15,25 @@ CREATE TABLE `games`
     `deck` TEXT,
     `discard` TEXT,
     `shop` TEXT,
-    `playerOne` int(10) unsigned NOT NULL,
-    `playerOneHand` TEXT,
-    `playerTwo` int(10) unsigned NOT NULL,
-    `playerTwoHand` TEXT,
+    `player_one` int(10) unsigned NOT NULL,
+    `player_one_hand` TEXT,
+    `player_two` int(10) unsigned NOT NULL,
+    `player_two_hand` TEXT,
+    `last_turn` int(10) unsigned,
     PRIMARY KEY (`id`),
-    INDEX `fk_playerOne` (`playerOne`),
-    INDEX `fk_playerTwo_idx` (`playerTwo`),
-    CONSTRAINT `fk_playerOne`
-        FOREIGN KEY (`playerOne`)
+    INDEX `fk_player_one` (`player_one`),
+    INDEX `fk_player_two` (`player_two`),
+    INDEX `fk_last_turn` (`last_turn`),
+    CONSTRAINT `fk_last_turn`
+        FOREIGN KEY (`last_turn`)
+        REFERENCES `turns` (`id`)
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_player_one`
+        FOREIGN KEY (`player_one`)
         REFERENCES `players` (`id`)
         ON UPDATE CASCADE,
-    CONSTRAINT `fk_playerTwo`
-        FOREIGN KEY (`playerTwo`)
+    CONSTRAINT `fk_player_two`
+        FOREIGN KEY (`player_two`)
         REFERENCES `players` (`id`)
         ON UPDATE CASCADE
 ) ENGINE=InnoDB;

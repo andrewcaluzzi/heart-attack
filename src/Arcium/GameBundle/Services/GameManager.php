@@ -6,6 +6,144 @@ use Arcium\GameBundle\Model;
 
 class GameManager
 {
+    /**
+     * Turn anatomy
+     *
+     * Phase 1: SETUP
+     * - choose a [heart] if there isn't one out
+     * - choose a [spade] to defend heart if:
+     *      * player has a [spade] in their hand
+     *      * [heart] hasn't got a [spade]
+     *      * [heart] hasn't lost previous [spade] (defence broken)
+     *
+     * Phase 2: ATTACK
+     * - if a player has a [club] in their hand:
+     *      * choose one or more [clubs] and use their total value as an attack
+     *      - if value > defending [heart] + [spade], discard both
+     *      - if value > defending [spade], discard [spade] and turn [heart] sideways (defence broken)
+     *
+     * Phase 3: SHOP
+     * - choose one or more [diamonds] and use total value to choose a card in the shop with the same or less value
+     *      * cannot draw beyond MAX_CARDS_IN_HAND
+     *
+     * Phase 4: CLEANUP
+     * - discard up to MAX_CARDS_IN_HAND and draw back up to MAX_CARDS_IN_HAND
+     */
+
+    const MAX_CARDS_IN_HAND = 5;
+
+
+    /*****************************
+     * CLASS MEMBERS AND FUNCTIONS
+     ****************************/
+
+
+    /** @var Model\Deck $deck */
+    private $deck;
+
+    /** @var Model\Deck $discard */
+    private $discard;
+
+    /** @var Model\Deck $shop */
+    private $shop;
+
+    /** @var Model\Game $game */
+    private $game;
+
+    /** @var Model\Deck $playerOneHand */
+    private $playerOneHand;
+
+    /** @var Model\Deck $playerTwoHand */
+    private $playerTwoHand;
+
+    /** @var Model\Turn $lastTurn */
+    private $lastTurn;
+
+    /**
+     * @param Model\Game $game The game object to use
+     * @param bool $create Whether to create a new game or load an existing one
+     */
+    public function __construct(Model\Game $game, $create = false)
+    {
+        $this->game = $game;
+
+        if($create)
+            $this->createNewGame();
+
+        else
+            $this->loadExistingGame();
+    }
+
+    private function createNewGame()
+    {
+        // setup the deck and shuffle
+        $fullDeck = self::getFullDeck(self::getStartingCards());
+        $this->deck = new Model\Deck($fullDeck);
+        $this->deck->shuffle();
+
+        // setup shop
+        $this->shop = new Model\Deck($this->deck->draw(5));
+
+        // setup empty discard
+        $this->discard = new Model\Deck(array());
+
+        // setup player hands
+        $this->playerOneHand = new Model\Deck($this->deck->draw(5));
+        $this->playerTwoHand = new Model\Deck($this->deck->draw(5));
+    }
+
+    private function loadExistingGame()
+    {
+        // load and setup deck
+        $this->deck = new Model\Deck($this->game->getDeck());
+
+        // load and setup shop
+        $this->shop = new Model\Deck($this->game->getShop());
+
+        // load and setup discard
+        $this->discard = new Model\Deck($this->game->getDiscard());
+
+        // load and setup player hands
+        $this->playerOneHand = new Model\Deck($this->game->getPlayerOneHand());
+        $this->playerTwoHand = new Model\Deck($this->game->getPlayerTwoHand());
+
+        // load and setup last turn (if exists)
+        $this->lastTurn = $this->game->getTurnRelatedByLastTurn();
+    }
+
+    public function handleTurn(Model\Turn $turn)
+    {
+
+    }
+
+    public function save()
+    {
+        ## TODO: handle saving of the game object
+        // save player hands, deck, discard, etc
+        $this->game->setDeck($this->deck->getCards());
+        $this->game->setShop($this->shop->getCards());
+        $this->game->setDiscard($this->discard->getCards());
+        $this->game->setPlayerOneHand($this->playerOneHand->getCards());
+        $this->game->setPlayerTwoHand($this->playerTwoHand->getCards());
+        $this->game->setLastTurn($this->lastTurn);
+
+        try
+        {
+            $this->game->save();
+        }
+
+        catch(Exception $e)
+        {
+            ## TODO: handle this
+        }
+    }
+
+
+    /******************************
+     * STATIC MEMBERS AND FUNCTIONS
+     *****************************/
+
+
     // card names
     private static $cardNames = array(
         'A' => 'Ace', 'K' => 'King', 'Q' => 'Queen', 'J' => 'Jack', '10' => '10', '9' => '9',

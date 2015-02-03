@@ -19,35 +19,20 @@ class GameController extends Controller
         $game = Model\GamePeer::retrieveByPK(1);
 
         /** @var $gm Services\GameManager */
-        $gm = new Services\GameManager($game, true);
+        $gm = new Services\GameManager($game);
         $gm->save();
 
-        var_dump($gm);
+        $turn = new Model\Turn();
+        $turn->setPlayerId(1);
+        $turn->setPhase(Model\TurnPeer::PHASE_SETUP);
+        $turn->setCards(array("Kh", "As"));
+        $turn->setGameId($game->getId());
 
-
-
-
-        /*$displayCards = function($cards) { return implode(', ', $cards); };
-
-        $startingCards = $gm->getFullDeck($gm->getStartingCards());
-        $history[] = "Unshuffled deck: " . $displayCards($startingCards);
-        $game->initialiseDeck($startingCards);
-        $history[] = "Shuffled deck:   " . $displayCards($game->getDeck());
-        $game->setPlayerOneHand(array());
-        $game->setPlayerTwoHand(array());
-
-        $game->drawCardsForPlayerOne(5);
-        $game->drawCardsForPlayerTwo(5);
+        $gm->handleTurn($turn);
 
         ## TODO: Store hearts and normal cards together in hand, split them out logically
+        ## TODO: Store game state (active heart/spade, lost hearts)
         ## TODO: Write functions for handling non-heart cards (eg. counts)
-
-        $history[] = "Player One: " . $playerOne->getName() . " starts with hand " . $displayCards($game->getPlayerOneHand());
-        $history[] = "Player Two: " . $playerTwo->getName() . " starts with hand " . $displayCards($game->getPlayerTwoHand());
-        $history[] = "Deck is now " . $displayCards($game->getDeck());*/
-
-
-
 
         return $this->render('ArciumGameBundle:Default:index.html.twig', array('history' => $history));
     }

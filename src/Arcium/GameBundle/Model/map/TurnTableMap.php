@@ -63,7 +63,7 @@ class TurnTableMap extends TableMap
     {
         $this->addRelation('GameRelatedByGameId', 'Arcium\\GameBundle\\Model\\Game', RelationMap::MANY_TO_ONE, array('game_id' => 'id', ), null, 'CASCADE');
         $this->addRelation('Player', 'Arcium\\GameBundle\\Model\\Player', RelationMap::MANY_TO_ONE, array('player_id' => 'id', ), null, 'CASCADE');
-        $this->addRelation('GameRelatedByLastTurn', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'last_turn', ), null, 'CASCADE', 'GamesRelatedByLastTurn');
+        $this->addRelation('GameRelatedByLastTurnId', 'Arcium\\GameBundle\\Model\\Game', RelationMap::ONE_TO_MANY, array('id' => 'last_turn_id', ), null, 'CASCADE', 'GamesRelatedByLastTurnId');
     } // buildRelations()
 
 } // TurnTableMap

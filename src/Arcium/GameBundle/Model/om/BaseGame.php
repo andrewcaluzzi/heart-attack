@@ -13,6 +13,8 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use Arcium\GameBundle\Model\Card;
+use Arcium\GameBundle\Model\CardQuery;
 use Arcium\GameBundle\Model\Game;
 use Arcium\GameBundle\Model\GamePeer;
 use Arcium\GameBundle\Model\GameQuery;
@@ -49,67 +51,70 @@ abstract class BaseGame extends BaseObject implements Persistent
     protected $id;
 
     /**
-     * The value for the deck field.
-     * @var        string
+     * The value for the draw field.
+     * @var        int
      */
-    protected $deck;
+    protected $draw;
 
     /**
      * The value for the discard field.
-     * @var        string
+     * @var        int
      */
     protected $discard;
 
     /**
      * The value for the shop field.
-     * @var        string
+     * @var        int
      */
     protected $shop;
 
     /**
-     * The value for the player_one field.
+     * The value for the player_one_id field.
      * @var        int
      */
-    protected $player_one;
+    protected $player_one_id;
 
     /**
-     * The value for the player_one_hand field.
-     * @var        string
-     */
-    protected $player_one_hand;
-
-    /**
-     * The value for the player_two field.
+     * The value for the player_two_id field.
      * @var        int
      */
-    protected $player_two;
+    protected $player_two_id;
 
     /**
-     * The value for the player_two_hand field.
-     * @var        string
-     */
-    protected $player_two_hand;
-
-    /**
-     * The value for the last_turn field.
+     * The value for the last_turn_id field.
      * @var        int
      */
-    protected $last_turn;
+    protected $last_turn_id;
+
+    /**
+     * @var        Card
+     */
+    protected $aCardRelatedByDiscard;
+
+    /**
+     * @var        Card
+     */
+    protected $aCardRelatedByDraw;
 
     /**
      * @var        Turn
      */
-    protected $aTurnRelatedByLastTurn;
+    protected $aTurnRelatedByLastTurnId;
 
     /**
      * @var        Player
      */
-    protected $aPlayerRelatedByPlayerOne;
+    protected $aPlayerRelatedByPlayerOneId;
 
     /**
      * @var        Player
      */
-    protected $aPlayerRelatedByPlayerTwo;
+    protected $aPlayerRelatedByPlayerTwoId;
+
+    /**
+     * @var        Card
+     */
+    protected $aCardRelatedByShop;
 
     /**
      * @var        PropelObjectCollection|Turn[] Collection to store aggregation of Turn objects.
@@ -155,20 +160,20 @@ abstract class BaseGame extends BaseObject implements Persistent
     }
 
     /**
-     * Get the [deck] column value.
+     * Get the [draw] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getDeck()
+    public function getDraw()
     {
 
-        return $this->deck;
+        return $this->draw;
     }
 
     /**
      * Get the [discard] column value.
      *
-     * @return string
+     * @return int
      */
     public function getDiscard()
     {
@@ -179,7 +184,7 @@ abstract class BaseGame extends BaseObject implements Persistent
     /**
      * Get the [shop] column value.
      *
-     * @return string
+     * @return int
      */
     public function getShop()
     {
@@ -188,58 +193,36 @@ abstract class BaseGame extends BaseObject implements Persistent
     }
 
     /**
-     * Get the [player_one] column value.
+     * Get the [player_one_id] column value.
      *
      * @return int
      */
-    public function getPlayerOne()
+    public function getPlayerOneId()
     {
 
-        return $this->player_one;
+        return $this->player_one_id;
     }
 
     /**
-     * Get the [player_one_hand] column value.
-     *
-     * @return string
-     */
-    public function getPlayerOneHand()
-    {
-
-        return $this->player_one_hand;
-    }
-
-    /**
-     * Get the [player_two] column value.
+     * Get the [player_two_id] column value.
      *
      * @return int
      */
-    public function getPlayerTwo()
+    public function getPlayerTwoId()
     {
 
-        return $this->player_two;
+        return $this->player_two_id;
     }
 
     /**
-     * Get the [player_two_hand] column value.
-     *
-     * @return string
-     */
-    public function getPlayerTwoHand()
-    {
-
-        return $this->player_two_hand;
-    }
-
-    /**
-     * Get the [last_turn] column value.
+     * Get the [last_turn_id] column value.
      *
      * @return int
      */
-    public function getLastTurn()
+    public function getLastTurnId()
     {
 
-        return $this->last_turn;
+        return $this->last_turn_id;
     }
 
     /**
@@ -264,41 +247,49 @@ abstract class BaseGame extends BaseObject implements Persistent
     } // setId()
 
     /**
-     * Set the value of [deck] column.
+     * Set the value of [draw] column.
      *
-     * @param  string $v new value
+     * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
-    public function setDeck($v)
+    public function setDraw($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
+        if ($v !== null && is_numeric($v)) {
+            $v = (int) $v;
         }
 
-        if ($this->deck !== $v) {
-            $this->deck = $v;
-            $this->modifiedColumns[] = GamePeer::DECK;
+        if ($this->draw !== $v) {
+            $this->draw = $v;
+            $this->modifiedColumns[] = GamePeer::DRAW;
+        }
+
+        if ($this->aCardRelatedByDraw !== null && $this->aCardRelatedByDraw->getId() !== $v) {
+            $this->aCardRelatedByDraw = null;
         }
 
 
         return $this;
-    } // setDeck()
+    } // setDraw()
 
     /**
      * Set the value of [discard] column.
      *
-     * @param  string $v new value
+     * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
     public function setDiscard($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
+        if ($v !== null && is_numeric($v)) {
+            $v = (int) $v;
         }
 
         if ($this->discard !== $v) {
             $this->discard = $v;
             $this->modifiedColumns[] = GamePeer::DISCARD;
+        }
+
+        if ($this->aCardRelatedByDiscard !== null && $this->aCardRelatedByDiscard->getId() !== $v) {
+            $this->aCardRelatedByDiscard = null;
         }
 
 
@@ -308,13 +299,13 @@ abstract class BaseGame extends BaseObject implements Persistent
     /**
      * Set the value of [shop] column.
      *
-     * @param  string $v new value
+     * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
     public function setShop($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
+        if ($v !== null && is_numeric($v)) {
+            $v = (int) $v;
         }
 
         if ($this->shop !== $v) {
@@ -322,126 +313,88 @@ abstract class BaseGame extends BaseObject implements Persistent
             $this->modifiedColumns[] = GamePeer::SHOP;
         }
 
+        if ($this->aCardRelatedByShop !== null && $this->aCardRelatedByShop->getId() !== $v) {
+            $this->aCardRelatedByShop = null;
+        }
+
 
         return $this;
     } // setShop()
 
     /**
-     * Set the value of [player_one] column.
+     * Set the value of [player_one_id] column.
      *
      * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
-    public function setPlayerOne($v)
+    public function setPlayerOneId($v)
     {
         if ($v !== null && is_numeric($v)) {
             $v = (int) $v;
         }
 
-        if ($this->player_one !== $v) {
-            $this->player_one = $v;
-            $this->modifiedColumns[] = GamePeer::PLAYER_ONE;
+        if ($this->player_one_id !== $v) {
+            $this->player_one_id = $v;
+            $this->modifiedColumns[] = GamePeer::PLAYER_ONE_ID;
         }
 
-        if ($this->aPlayerRelatedByPlayerOne !== null && $this->aPlayerRelatedByPlayerOne->getId() !== $v) {
-            $this->aPlayerRelatedByPlayerOne = null;
-        }
-
-
-        return $this;
-    } // setPlayerOne()
-
-    /**
-     * Set the value of [player_one_hand] column.
-     *
-     * @param  string $v new value
-     * @return Game The current object (for fluent API support)
-     */
-    public function setPlayerOneHand($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->player_one_hand !== $v) {
-            $this->player_one_hand = $v;
-            $this->modifiedColumns[] = GamePeer::PLAYER_ONE_HAND;
+        if ($this->aPlayerRelatedByPlayerOneId !== null && $this->aPlayerRelatedByPlayerOneId->getId() !== $v) {
+            $this->aPlayerRelatedByPlayerOneId = null;
         }
 
 
         return $this;
-    } // setPlayerOneHand()
+    } // setPlayerOneId()
 
     /**
-     * Set the value of [player_two] column.
+     * Set the value of [player_two_id] column.
      *
      * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
-    public function setPlayerTwo($v)
+    public function setPlayerTwoId($v)
     {
         if ($v !== null && is_numeric($v)) {
             $v = (int) $v;
         }
 
-        if ($this->player_two !== $v) {
-            $this->player_two = $v;
-            $this->modifiedColumns[] = GamePeer::PLAYER_TWO;
+        if ($this->player_two_id !== $v) {
+            $this->player_two_id = $v;
+            $this->modifiedColumns[] = GamePeer::PLAYER_TWO_ID;
         }
 
-        if ($this->aPlayerRelatedByPlayerTwo !== null && $this->aPlayerRelatedByPlayerTwo->getId() !== $v) {
-            $this->aPlayerRelatedByPlayerTwo = null;
-        }
-
-
-        return $this;
-    } // setPlayerTwo()
-
-    /**
-     * Set the value of [player_two_hand] column.
-     *
-     * @param  string $v new value
-     * @return Game The current object (for fluent API support)
-     */
-    public function setPlayerTwoHand($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->player_two_hand !== $v) {
-            $this->player_two_hand = $v;
-            $this->modifiedColumns[] = GamePeer::PLAYER_TWO_HAND;
+        if ($this->aPlayerRelatedByPlayerTwoId !== null && $this->aPlayerRelatedByPlayerTwoId->getId() !== $v) {
+            $this->aPlayerRelatedByPlayerTwoId = null;
         }
 
 
         return $this;
-    } // setPlayerTwoHand()
+    } // setPlayerTwoId()
 
     /**
-     * Set the value of [last_turn] column.
+     * Set the value of [last_turn_id] column.
      *
      * @param  int $v new value
      * @return Game The current object (for fluent API support)
      */
-    public function setLastTurn($v)
+    public function setLastTurnId($v)
     {
         if ($v !== null && is_numeric($v)) {
             $v = (int) $v;
         }
 
-        if ($this->last_turn !== $v) {
-            $this->last_turn = $v;
-            $this->modifiedColumns[] = GamePeer::LAST_TURN;
+        if ($this->last_turn_id !== $v) {
+            $this->last_turn_id = $v;
+            $this->modifiedColumns[] = GamePeer::LAST_TURN_ID;
         }
 
-        if ($this->aTurnRelatedByLastTurn !== null && $this->aTurnRelatedByLastTurn->getId() !== $v) {
-            $this->aTurnRelatedByLastTurn = null;
+        if ($this->aTurnRelatedByLastTurnId !== null && $this->aTurnRelatedByLastTurnId->getId() !== $v) {
+            $this->aTurnRelatedByLastTurnId = null;
         }
 
 
         return $this;
-    } // setLastTurn()
+    } // setLastTurnId()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -476,14 +429,12 @@ abstract class BaseGame extends BaseObject implements Persistent
         try {
 
             $this->id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
-            $this->deck = ($row[$startcol + 1] !== null) ? (string) $row[$startcol + 1] : null;
-            $this->discard = ($row[$startcol + 2] !== null) ? (string) $row[$startcol + 2] : null;
-            $this->shop = ($row[$startcol + 3] !== null) ? (string) $row[$startcol + 3] : null;
-            $this->player_one = ($row[$startcol + 4] !== null) ? (int) $row[$startcol + 4] : null;
-            $this->player_one_hand = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
-            $this->player_two = ($row[$startcol + 6] !== null) ? (int) $row[$startcol + 6] : null;
-            $this->player_two_hand = ($row[$startcol + 7] !== null) ? (string) $row[$startcol + 7] : null;
-            $this->last_turn = ($row[$startcol + 8] !== null) ? (int) $row[$startcol + 8] : null;
+            $this->draw = ($row[$startcol + 1] !== null) ? (int) $row[$startcol + 1] : null;
+            $this->discard = ($row[$startcol + 2] !== null) ? (int) $row[$startcol + 2] : null;
+            $this->shop = ($row[$startcol + 3] !== null) ? (int) $row[$startcol + 3] : null;
+            $this->player_one_id = ($row[$startcol + 4] !== null) ? (int) $row[$startcol + 4] : null;
+            $this->player_two_id = ($row[$startcol + 5] !== null) ? (int) $row[$startcol + 5] : null;
+            $this->last_turn_id = ($row[$startcol + 6] !== null) ? (int) $row[$startcol + 6] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -493,7 +444,7 @@ abstract class BaseGame extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 9; // 9 = GamePeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 7; // 7 = GamePeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating Game object", $e);
@@ -516,14 +467,23 @@ abstract class BaseGame extends BaseObject implements Persistent
     public function ensureConsistency()
     {
 
-        if ($this->aPlayerRelatedByPlayerOne !== null && $this->player_one !== $this->aPlayerRelatedByPlayerOne->getId()) {
-            $this->aPlayerRelatedByPlayerOne = null;
+        if ($this->aCardRelatedByDraw !== null && $this->draw !== $this->aCardRelatedByDraw->getId()) {
+            $this->aCardRelatedByDraw = null;
         }
-        if ($this->aPlayerRelatedByPlayerTwo !== null && $this->player_two !== $this->aPlayerRelatedByPlayerTwo->getId()) {
-            $this->aPlayerRelatedByPlayerTwo = null;
+        if ($this->aCardRelatedByDiscard !== null && $this->discard !== $this->aCardRelatedByDiscard->getId()) {
+            $this->aCardRelatedByDiscard = null;
         }
-        if ($this->aTurnRelatedByLastTurn !== null && $this->last_turn !== $this->aTurnRelatedByLastTurn->getId()) {
-            $this->aTurnRelatedByLastTurn = null;
+        if ($this->aCardRelatedByShop !== null && $this->shop !== $this->aCardRelatedByShop->getId()) {
+            $this->aCardRelatedByShop = null;
+        }
+        if ($this->aPlayerRelatedByPlayerOneId !== null && $this->player_one_id !== $this->aPlayerRelatedByPlayerOneId->getId()) {
+            $this->aPlayerRelatedByPlayerOneId = null;
+        }
+        if ($this->aPlayerRelatedByPlayerTwoId !== null && $this->player_two_id !== $this->aPlayerRelatedByPlayerTwoId->getId()) {
+            $this->aPlayerRelatedByPlayerTwoId = null;
+        }
+        if ($this->aTurnRelatedByLastTurnId !== null && $this->last_turn_id !== $this->aTurnRelatedByLastTurnId->getId()) {
+            $this->aTurnRelatedByLastTurnId = null;
         }
     } // ensureConsistency
 
@@ -564,9 +524,12 @@ abstract class BaseGame extends BaseObject implements Persistent
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aTurnRelatedByLastTurn = null;
-            $this->aPlayerRelatedByPlayerOne = null;
-            $this->aPlayerRelatedByPlayerTwo = null;
+            $this->aCardRelatedByDiscard = null;
+            $this->aCardRelatedByDraw = null;
+            $this->aTurnRelatedByLastTurnId = null;
+            $this->aPlayerRelatedByPlayerOneId = null;
+            $this->aPlayerRelatedByPlayerTwoId = null;
+            $this->aCardRelatedByShop = null;
             $this->collTurnsRelatedByGameId = null;
 
         } // if (deep)
@@ -687,25 +650,46 @@ abstract class BaseGame extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aTurnRelatedByLastTurn !== null) {
-                if ($this->aTurnRelatedByLastTurn->isModified() || $this->aTurnRelatedByLastTurn->isNew()) {
-                    $affectedRows += $this->aTurnRelatedByLastTurn->save($con);
+            if ($this->aCardRelatedByDiscard !== null) {
+                if ($this->aCardRelatedByDiscard->isModified() || $this->aCardRelatedByDiscard->isNew()) {
+                    $affectedRows += $this->aCardRelatedByDiscard->save($con);
                 }
-                $this->setTurnRelatedByLastTurn($this->aTurnRelatedByLastTurn);
+                $this->setCardRelatedByDiscard($this->aCardRelatedByDiscard);
             }
 
-            if ($this->aPlayerRelatedByPlayerOne !== null) {
-                if ($this->aPlayerRelatedByPlayerOne->isModified() || $this->aPlayerRelatedByPlayerOne->isNew()) {
-                    $affectedRows += $this->aPlayerRelatedByPlayerOne->save($con);
+            if ($this->aCardRelatedByDraw !== null) {
+                if ($this->aCardRelatedByDraw->isModified() || $this->aCardRelatedByDraw->isNew()) {
+                    $affectedRows += $this->aCardRelatedByDraw->save($con);
                 }
-                $this->setPlayerRelatedByPlayerOne($this->aPlayerRelatedByPlayerOne);
+                $this->setCardRelatedByDraw($this->aCardRelatedByDraw);
             }
 
-            if ($this->aPlayerRelatedByPlayerTwo !== null) {
-                if ($this->aPlayerRelatedByPlayerTwo->isModified() || $this->aPlayerRelatedByPlayerTwo->isNew()) {
-                    $affectedRows += $this->aPlayerRelatedByPlayerTwo->save($con);
+            if ($this->aTurnRelatedByLastTurnId !== null) {
+                if ($this->aTurnRelatedByLastTurnId->isModified() || $this->aTurnRelatedByLastTurnId->isNew()) {
+                    $affectedRows += $this->aTurnRelatedByLastTurnId->save($con);
                 }
-                $this->setPlayerRelatedByPlayerTwo($this->aPlayerRelatedByPlayerTwo);
+                $this->setTurnRelatedByLastTurnId($this->aTurnRelatedByLastTurnId);
+            }
+
+            if ($this->aPlayerRelatedByPlayerOneId !== null) {
+                if ($this->aPlayerRelatedByPlayerOneId->isModified() || $this->aPlayerRelatedByPlayerOneId->isNew()) {
+                    $affectedRows += $this->aPlayerRelatedByPlayerOneId->save($con);
+                }
+                $this->setPlayerRelatedByPlayerOneId($this->aPlayerRelatedByPlayerOneId);
+            }
+
+            if ($this->aPlayerRelatedByPlayerTwoId !== null) {
+                if ($this->aPlayerRelatedByPlayerTwoId->isModified() || $this->aPlayerRelatedByPlayerTwoId->isNew()) {
+                    $affectedRows += $this->aPlayerRelatedByPlayerTwoId->save($con);
+                }
+                $this->setPlayerRelatedByPlayerTwoId($this->aPlayerRelatedByPlayerTwoId);
+            }
+
+            if ($this->aCardRelatedByShop !== null) {
+                if ($this->aCardRelatedByShop->isModified() || $this->aCardRelatedByShop->isNew()) {
+                    $affectedRows += $this->aCardRelatedByShop->save($con);
+                }
+                $this->setCardRelatedByShop($this->aCardRelatedByShop);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -765,8 +749,8 @@ abstract class BaseGame extends BaseObject implements Persistent
         if ($this->isColumnModified(GamePeer::ID)) {
             $modifiedColumns[':p' . $index++]  = '`id`';
         }
-        if ($this->isColumnModified(GamePeer::DECK)) {
-            $modifiedColumns[':p' . $index++]  = '`deck`';
+        if ($this->isColumnModified(GamePeer::DRAW)) {
+            $modifiedColumns[':p' . $index++]  = '`draw`';
         }
         if ($this->isColumnModified(GamePeer::DISCARD)) {
             $modifiedColumns[':p' . $index++]  = '`discard`';
@@ -774,20 +758,14 @@ abstract class BaseGame extends BaseObject implements Persistent
         if ($this->isColumnModified(GamePeer::SHOP)) {
             $modifiedColumns[':p' . $index++]  = '`shop`';
         }
-        if ($this->isColumnModified(GamePeer::PLAYER_ONE)) {
-            $modifiedColumns[':p' . $index++]  = '`player_one`';
+        if ($this->isColumnModified(GamePeer::PLAYER_ONE_ID)) {
+            $modifiedColumns[':p' . $index++]  = '`player_one_id`';
         }
-        if ($this->isColumnModified(GamePeer::PLAYER_ONE_HAND)) {
-            $modifiedColumns[':p' . $index++]  = '`player_one_hand`';
+        if ($this->isColumnModified(GamePeer::PLAYER_TWO_ID)) {
+            $modifiedColumns[':p' . $index++]  = '`player_two_id`';
         }
-        if ($this->isColumnModified(GamePeer::PLAYER_TWO)) {
-            $modifiedColumns[':p' . $index++]  = '`player_two`';
-        }
-        if ($this->isColumnModified(GamePeer::PLAYER_TWO_HAND)) {
-            $modifiedColumns[':p' . $index++]  = '`player_two_hand`';
-        }
-        if ($this->isColumnModified(GamePeer::LAST_TURN)) {
-            $modifiedColumns[':p' . $index++]  = '`last_turn`';
+        if ($this->isColumnModified(GamePeer::LAST_TURN_ID)) {
+            $modifiedColumns[':p' . $index++]  = '`last_turn_id`';
         }
 
         $sql = sprintf(
@@ -803,29 +781,23 @@ abstract class BaseGame extends BaseObject implements Persistent
                     case '`id`':
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
                         break;
-                    case '`deck`':
-                        $stmt->bindValue($identifier, $this->deck, PDO::PARAM_STR);
+                    case '`draw`':
+                        $stmt->bindValue($identifier, $this->draw, PDO::PARAM_INT);
                         break;
                     case '`discard`':
-                        $stmt->bindValue($identifier, $this->discard, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->discard, PDO::PARAM_INT);
                         break;
                     case '`shop`':
-                        $stmt->bindValue($identifier, $this->shop, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->shop, PDO::PARAM_INT);
                         break;
-                    case '`player_one`':
-                        $stmt->bindValue($identifier, $this->player_one, PDO::PARAM_INT);
+                    case '`player_one_id`':
+                        $stmt->bindValue($identifier, $this->player_one_id, PDO::PARAM_INT);
                         break;
-                    case '`player_one_hand`':
-                        $stmt->bindValue($identifier, $this->player_one_hand, PDO::PARAM_STR);
+                    case '`player_two_id`':
+                        $stmt->bindValue($identifier, $this->player_two_id, PDO::PARAM_INT);
                         break;
-                    case '`player_two`':
-                        $stmt->bindValue($identifier, $this->player_two, PDO::PARAM_INT);
-                        break;
-                    case '`player_two_hand`':
-                        $stmt->bindValue($identifier, $this->player_two_hand, PDO::PARAM_STR);
-                        break;
-                    case '`last_turn`':
-                        $stmt->bindValue($identifier, $this->last_turn, PDO::PARAM_INT);
+                    case '`last_turn_id`':
+                        $stmt->bindValue($identifier, $this->last_turn_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -926,21 +898,39 @@ abstract class BaseGame extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aTurnRelatedByLastTurn !== null) {
-                if (!$this->aTurnRelatedByLastTurn->validate($columns)) {
-                    $failureMap = array_merge($failureMap, $this->aTurnRelatedByLastTurn->getValidationFailures());
+            if ($this->aCardRelatedByDiscard !== null) {
+                if (!$this->aCardRelatedByDiscard->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aCardRelatedByDiscard->getValidationFailures());
                 }
             }
 
-            if ($this->aPlayerRelatedByPlayerOne !== null) {
-                if (!$this->aPlayerRelatedByPlayerOne->validate($columns)) {
-                    $failureMap = array_merge($failureMap, $this->aPlayerRelatedByPlayerOne->getValidationFailures());
+            if ($this->aCardRelatedByDraw !== null) {
+                if (!$this->aCardRelatedByDraw->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aCardRelatedByDraw->getValidationFailures());
                 }
             }
 
-            if ($this->aPlayerRelatedByPlayerTwo !== null) {
-                if (!$this->aPlayerRelatedByPlayerTwo->validate($columns)) {
-                    $failureMap = array_merge($failureMap, $this->aPlayerRelatedByPlayerTwo->getValidationFailures());
+            if ($this->aTurnRelatedByLastTurnId !== null) {
+                if (!$this->aTurnRelatedByLastTurnId->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aTurnRelatedByLastTurnId->getValidationFailures());
+                }
+            }
+
+            if ($this->aPlayerRelatedByPlayerOneId !== null) {
+                if (!$this->aPlayerRelatedByPlayerOneId->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aPlayerRelatedByPlayerOneId->getValidationFailures());
+                }
+            }
+
+            if ($this->aPlayerRelatedByPlayerTwoId !== null) {
+                if (!$this->aPlayerRelatedByPlayerTwoId->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aPlayerRelatedByPlayerTwoId->getValidationFailures());
+                }
+            }
+
+            if ($this->aCardRelatedByShop !== null) {
+                if (!$this->aCardRelatedByShop->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aCardRelatedByShop->getValidationFailures());
                 }
             }
 
@@ -997,7 +987,7 @@ abstract class BaseGame extends BaseObject implements Persistent
                 return $this->getId();
                 break;
             case 1:
-                return $this->getDeck();
+                return $this->getDraw();
                 break;
             case 2:
                 return $this->getDiscard();
@@ -1006,19 +996,13 @@ abstract class BaseGame extends BaseObject implements Persistent
                 return $this->getShop();
                 break;
             case 4:
-                return $this->getPlayerOne();
+                return $this->getPlayerOneId();
                 break;
             case 5:
-                return $this->getPlayerOneHand();
+                return $this->getPlayerTwoId();
                 break;
             case 6:
-                return $this->getPlayerTwo();
-                break;
-            case 7:
-                return $this->getPlayerTwoHand();
-                break;
-            case 8:
-                return $this->getLastTurn();
+                return $this->getLastTurnId();
                 break;
             default:
                 return null;
@@ -1050,14 +1034,12 @@ abstract class BaseGame extends BaseObject implements Persistent
         $keys = GamePeer::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getDeck(),
+            $keys[1] => $this->getDraw(),
             $keys[2] => $this->getDiscard(),
             $keys[3] => $this->getShop(),
-            $keys[4] => $this->getPlayerOne(),
-            $keys[5] => $this->getPlayerOneHand(),
-            $keys[6] => $this->getPlayerTwo(),
-            $keys[7] => $this->getPlayerTwoHand(),
-            $keys[8] => $this->getLastTurn(),
+            $keys[4] => $this->getPlayerOneId(),
+            $keys[5] => $this->getPlayerTwoId(),
+            $keys[6] => $this->getLastTurnId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1065,14 +1047,23 @@ abstract class BaseGame extends BaseObject implements Persistent
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aTurnRelatedByLastTurn) {
-                $result['TurnRelatedByLastTurn'] = $this->aTurnRelatedByLastTurn->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aCardRelatedByDiscard) {
+                $result['CardRelatedByDiscard'] = $this->aCardRelatedByDiscard->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aPlayerRelatedByPlayerOne) {
-                $result['PlayerRelatedByPlayerOne'] = $this->aPlayerRelatedByPlayerOne->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aCardRelatedByDraw) {
+                $result['CardRelatedByDraw'] = $this->aCardRelatedByDraw->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
-            if (null !== $this->aPlayerRelatedByPlayerTwo) {
-                $result['PlayerRelatedByPlayerTwo'] = $this->aPlayerRelatedByPlayerTwo->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aTurnRelatedByLastTurnId) {
+                $result['TurnRelatedByLastTurnId'] = $this->aTurnRelatedByLastTurnId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aPlayerRelatedByPlayerOneId) {
+                $result['PlayerRelatedByPlayerOneId'] = $this->aPlayerRelatedByPlayerOneId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aPlayerRelatedByPlayerTwoId) {
+                $result['PlayerRelatedByPlayerTwoId'] = $this->aPlayerRelatedByPlayerTwoId->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aCardRelatedByShop) {
+                $result['CardRelatedByShop'] = $this->aCardRelatedByShop->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->collTurnsRelatedByGameId) {
                 $result['TurnsRelatedByGameId'] = $this->collTurnsRelatedByGameId->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
@@ -1115,7 +1106,7 @@ abstract class BaseGame extends BaseObject implements Persistent
                 $this->setId($value);
                 break;
             case 1:
-                $this->setDeck($value);
+                $this->setDraw($value);
                 break;
             case 2:
                 $this->setDiscard($value);
@@ -1124,19 +1115,13 @@ abstract class BaseGame extends BaseObject implements Persistent
                 $this->setShop($value);
                 break;
             case 4:
-                $this->setPlayerOne($value);
+                $this->setPlayerOneId($value);
                 break;
             case 5:
-                $this->setPlayerOneHand($value);
+                $this->setPlayerTwoId($value);
                 break;
             case 6:
-                $this->setPlayerTwo($value);
-                break;
-            case 7:
-                $this->setPlayerTwoHand($value);
-                break;
-            case 8:
-                $this->setLastTurn($value);
+                $this->setLastTurnId($value);
                 break;
         } // switch()
     }
@@ -1163,14 +1148,12 @@ abstract class BaseGame extends BaseObject implements Persistent
         $keys = GamePeer::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setDeck($arr[$keys[1]]);
+        if (array_key_exists($keys[1], $arr)) $this->setDraw($arr[$keys[1]]);
         if (array_key_exists($keys[2], $arr)) $this->setDiscard($arr[$keys[2]]);
         if (array_key_exists($keys[3], $arr)) $this->setShop($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setPlayerOne($arr[$keys[4]]);
-        if (array_key_exists($keys[5], $arr)) $this->setPlayerOneHand($arr[$keys[5]]);
-        if (array_key_exists($keys[6], $arr)) $this->setPlayerTwo($arr[$keys[6]]);
-        if (array_key_exists($keys[7], $arr)) $this->setPlayerTwoHand($arr[$keys[7]]);
-        if (array_key_exists($keys[8], $arr)) $this->setLastTurn($arr[$keys[8]]);
+        if (array_key_exists($keys[4], $arr)) $this->setPlayerOneId($arr[$keys[4]]);
+        if (array_key_exists($keys[5], $arr)) $this->setPlayerTwoId($arr[$keys[5]]);
+        if (array_key_exists($keys[6], $arr)) $this->setLastTurnId($arr[$keys[6]]);
     }
 
     /**
@@ -1183,14 +1166,12 @@ abstract class BaseGame extends BaseObject implements Persistent
         $criteria = new Criteria(GamePeer::DATABASE_NAME);
 
         if ($this->isColumnModified(GamePeer::ID)) $criteria->add(GamePeer::ID, $this->id);
-        if ($this->isColumnModified(GamePeer::DECK)) $criteria->add(GamePeer::DECK, $this->deck);
+        if ($this->isColumnModified(GamePeer::DRAW)) $criteria->add(GamePeer::DRAW, $this->draw);
         if ($this->isColumnModified(GamePeer::DISCARD)) $criteria->add(GamePeer::DISCARD, $this->discard);
         if ($this->isColumnModified(GamePeer::SHOP)) $criteria->add(GamePeer::SHOP, $this->shop);
-        if ($this->isColumnModified(GamePeer::PLAYER_ONE)) $criteria->add(GamePeer::PLAYER_ONE, $this->player_one);
-        if ($this->isColumnModified(GamePeer::PLAYER_ONE_HAND)) $criteria->add(GamePeer::PLAYER_ONE_HAND, $this->player_one_hand);
-        if ($this->isColumnModified(GamePeer::PLAYER_TWO)) $criteria->add(GamePeer::PLAYER_TWO, $this->player_two);
-        if ($this->isColumnModified(GamePeer::PLAYER_TWO_HAND)) $criteria->add(GamePeer::PLAYER_TWO_HAND, $this->player_two_hand);
-        if ($this->isColumnModified(GamePeer::LAST_TURN)) $criteria->add(GamePeer::LAST_TURN, $this->last_turn);
+        if ($this->isColumnModified(GamePeer::PLAYER_ONE_ID)) $criteria->add(GamePeer::PLAYER_ONE_ID, $this->player_one_id);
+        if ($this->isColumnModified(GamePeer::PLAYER_TWO_ID)) $criteria->add(GamePeer::PLAYER_TWO_ID, $this->player_two_id);
+        if ($this->isColumnModified(GamePeer::LAST_TURN_ID)) $criteria->add(GamePeer::LAST_TURN_ID, $this->last_turn_id);
 
         return $criteria;
     }
@@ -1254,14 +1235,12 @@ abstract class BaseGame extends BaseObject implements Persistent
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setDeck($this->getDeck());
+        $copyObj->setDraw($this->getDraw());
         $copyObj->setDiscard($this->getDiscard());
         $copyObj->setShop($this->getShop());
-        $copyObj->setPlayerOne($this->getPlayerOne());
-        $copyObj->setPlayerOneHand($this->getPlayerOneHand());
-        $copyObj->setPlayerTwo($this->getPlayerTwo());
-        $copyObj->setPlayerTwoHand($this->getPlayerTwoHand());
-        $copyObj->setLastTurn($this->getLastTurn());
+        $copyObj->setPlayerOneId($this->getPlayerOneId());
+        $copyObj->setPlayerTwoId($this->getPlayerTwoId());
+        $copyObj->setLastTurnId($this->getLastTurnId());
 
         if ($deepCopy && !$this->startCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1327,26 +1306,130 @@ abstract class BaseGame extends BaseObject implements Persistent
     }
 
     /**
+     * Declares an association between this object and a Card object.
+     *
+     * @param                  Card $v
+     * @return Game The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setCardRelatedByDiscard(Card $v = null)
+    {
+        if ($v === null) {
+            $this->setDiscard(NULL);
+        } else {
+            $this->setDiscard($v->getId());
+        }
+
+        $this->aCardRelatedByDiscard = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the Card object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGameRelatedByDiscard($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated Card object
+     *
+     * @param PropelPDO $con Optional Connection object.
+     * @param $doQuery Executes a query to get the object if required
+     * @return Card The associated Card object.
+     * @throws PropelException
+     */
+    public function getCardRelatedByDiscard(PropelPDO $con = null, $doQuery = true)
+    {
+        if ($this->aCardRelatedByDiscard === null && ($this->discard !== null) && $doQuery) {
+            $this->aCardRelatedByDiscard = CardQuery::create()->findPk($this->discard, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aCardRelatedByDiscard->addGamesRelatedByDiscard($this);
+             */
+        }
+
+        return $this->aCardRelatedByDiscard;
+    }
+
+    /**
+     * Declares an association between this object and a Card object.
+     *
+     * @param                  Card $v
+     * @return Game The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setCardRelatedByDraw(Card $v = null)
+    {
+        if ($v === null) {
+            $this->setDraw(NULL);
+        } else {
+            $this->setDraw($v->getId());
+        }
+
+        $this->aCardRelatedByDraw = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the Card object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGameRelatedByDraw($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated Card object
+     *
+     * @param PropelPDO $con Optional Connection object.
+     * @param $doQuery Executes a query to get the object if required
+     * @return Card The associated Card object.
+     * @throws PropelException
+     */
+    public function getCardRelatedByDraw(PropelPDO $con = null, $doQuery = true)
+    {
+        if ($this->aCardRelatedByDraw === null && ($this->draw !== null) && $doQuery) {
+            $this->aCardRelatedByDraw = CardQuery::create()->findPk($this->draw, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aCardRelatedByDraw->addGamesRelatedByDraw($this);
+             */
+        }
+
+        return $this->aCardRelatedByDraw;
+    }
+
+    /**
      * Declares an association between this object and a Turn object.
      *
      * @param                  Turn $v
      * @return Game The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setTurnRelatedByLastTurn(Turn $v = null)
+    public function setTurnRelatedByLastTurnId(Turn $v = null)
     {
         if ($v === null) {
-            $this->setLastTurn(NULL);
+            $this->setLastTurnId(NULL);
         } else {
-            $this->setLastTurn($v->getId());
+            $this->setLastTurnId($v->getId());
         }
 
-        $this->aTurnRelatedByLastTurn = $v;
+        $this->aTurnRelatedByLastTurnId = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the Turn object, it will not be re-added.
         if ($v !== null) {
-            $v->addGameRelatedByLastTurn($this);
+            $v->addGameRelatedByLastTurnId($this);
         }
 
 
@@ -1362,20 +1445,20 @@ abstract class BaseGame extends BaseObject implements Persistent
      * @return Turn The associated Turn object.
      * @throws PropelException
      */
-    public function getTurnRelatedByLastTurn(PropelPDO $con = null, $doQuery = true)
+    public function getTurnRelatedByLastTurnId(PropelPDO $con = null, $doQuery = true)
     {
-        if ($this->aTurnRelatedByLastTurn === null && ($this->last_turn !== null) && $doQuery) {
-            $this->aTurnRelatedByLastTurn = TurnQuery::create()->findPk($this->last_turn, $con);
+        if ($this->aTurnRelatedByLastTurnId === null && ($this->last_turn_id !== null) && $doQuery) {
+            $this->aTurnRelatedByLastTurnId = TurnQuery::create()->findPk($this->last_turn_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aTurnRelatedByLastTurn->addGamesRelatedByLastTurn($this);
+                $this->aTurnRelatedByLastTurnId->addGamesRelatedByLastTurnId($this);
              */
         }
 
-        return $this->aTurnRelatedByLastTurn;
+        return $this->aTurnRelatedByLastTurnId;
     }
 
     /**
@@ -1385,20 +1468,20 @@ abstract class BaseGame extends BaseObject implements Persistent
      * @return Game The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setPlayerRelatedByPlayerOne(Player $v = null)
+    public function setPlayerRelatedByPlayerOneId(Player $v = null)
     {
         if ($v === null) {
-            $this->setPlayerOne(NULL);
+            $this->setPlayerOneId(NULL);
         } else {
-            $this->setPlayerOne($v->getId());
+            $this->setPlayerOneId($v->getId());
         }
 
-        $this->aPlayerRelatedByPlayerOne = $v;
+        $this->aPlayerRelatedByPlayerOneId = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the Player object, it will not be re-added.
         if ($v !== null) {
-            $v->addGameRelatedByPlayerOne($this);
+            $v->addGameRelatedByPlayerOneId($this);
         }
 
 
@@ -1414,20 +1497,20 @@ abstract class BaseGame extends BaseObject implements Persistent
      * @return Player The associated Player object.
      * @throws PropelException
      */
-    public function getPlayerRelatedByPlayerOne(PropelPDO $con = null, $doQuery = true)
+    public function getPlayerRelatedByPlayerOneId(PropelPDO $con = null, $doQuery = true)
     {
-        if ($this->aPlayerRelatedByPlayerOne === null && ($this->player_one !== null) && $doQuery) {
-            $this->aPlayerRelatedByPlayerOne = PlayerQuery::create()->findPk($this->player_one, $con);
+        if ($this->aPlayerRelatedByPlayerOneId === null && ($this->player_one_id !== null) && $doQuery) {
+            $this->aPlayerRelatedByPlayerOneId = PlayerQuery::create()->findPk($this->player_one_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aPlayerRelatedByPlayerOne->addGamesRelatedByPlayerOne($this);
+                $this->aPlayerRelatedByPlayerOneId->addGamesRelatedByPlayerOneId($this);
              */
         }
 
-        return $this->aPlayerRelatedByPlayerOne;
+        return $this->aPlayerRelatedByPlayerOneId;
     }
 
     /**
@@ -1437,20 +1520,20 @@ abstract class BaseGame extends BaseObject implements Persistent
      * @return Game The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setPlayerRelatedByPlayerTwo(Player $v = null)
+    public function setPlayerRelatedByPlayerTwoId(Player $v = null)
     {
         if ($v === null) {
-            $this->setPlayerTwo(NULL);
+            $this->setPlayerTwoId(NULL);
         } else {
-            $this->setPlayerTwo($v->getId());
+            $this->setPlayerTwoId($v->getId());
         }
 
-        $this->aPlayerRelatedByPlayerTwo = $v;
+        $this->aPlayerRelatedByPlayerTwoId = $v;
 
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the Player object, it will not be re-added.
         if ($v !== null) {
-            $v->addGameRelatedByPlayerTwo($this);
+            $v->addGameRelatedByPlayerTwoId($this);
         }
 
 
@@ -1466,20 +1549,72 @@ abstract class BaseGame extends BaseObject implements Persistent
      * @return Player The associated Player object.
      * @throws PropelException
      */
-    public function getPlayerRelatedByPlayerTwo(PropelPDO $con = null, $doQuery = true)
+    public function getPlayerRelatedByPlayerTwoId(PropelPDO $con = null, $doQuery = true)
     {
-        if ($this->aPlayerRelatedByPlayerTwo === null && ($this->player_two !== null) && $doQuery) {
-            $this->aPlayerRelatedByPlayerTwo = PlayerQuery::create()->findPk($this->player_two, $con);
+        if ($this->aPlayerRelatedByPlayerTwoId === null && ($this->player_two_id !== null) && $doQuery) {
+            $this->aPlayerRelatedByPlayerTwoId = PlayerQuery::create()->findPk($this->player_two_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aPlayerRelatedByPlayerTwo->addGamesRelatedByPlayerTwo($this);
+                $this->aPlayerRelatedByPlayerTwoId->addGamesRelatedByPlayerTwoId($this);
              */
         }
 
-        return $this->aPlayerRelatedByPlayerTwo;
+        return $this->aPlayerRelatedByPlayerTwoId;
+    }
+
+    /**
+     * Declares an association between this object and a Card object.
+     *
+     * @param                  Card $v
+     * @return Game The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setCardRelatedByShop(Card $v = null)
+    {
+        if ($v === null) {
+            $this->setShop(NULL);
+        } else {
+            $this->setShop($v->getId());
+        }
+
+        $this->aCardRelatedByShop = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the Card object, it will not be re-added.
+        if ($v !== null) {
+            $v->addGameRelatedByShop($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated Card object
+     *
+     * @param PropelPDO $con Optional Connection object.
+     * @param $doQuery Executes a query to get the object if required
+     * @return Card The associated Card object.
+     * @throws PropelException
+     */
+    public function getCardRelatedByShop(PropelPDO $con = null, $doQuery = true)
+    {
+        if ($this->aCardRelatedByShop === null && ($this->shop !== null) && $doQuery) {
+            $this->aCardRelatedByShop = CardQuery::create()->findPk($this->shop, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aCardRelatedByShop->addGamesRelatedByShop($this);
+             */
+        }
+
+        return $this->aCardRelatedByShop;
     }
 
 
@@ -1754,14 +1889,12 @@ abstract class BaseGame extends BaseObject implements Persistent
     public function clear()
     {
         $this->id = null;
-        $this->deck = null;
+        $this->draw = null;
         $this->discard = null;
         $this->shop = null;
-        $this->player_one = null;
-        $this->player_one_hand = null;
-        $this->player_two = null;
-        $this->player_two_hand = null;
-        $this->last_turn = null;
+        $this->player_one_id = null;
+        $this->player_two_id = null;
+        $this->last_turn_id = null;
         $this->alreadyInSave = false;
         $this->alreadyInValidation = false;
         $this->alreadyInClearAllReferencesDeep = false;
@@ -1789,14 +1922,23 @@ abstract class BaseGame extends BaseObject implements Persistent
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->aTurnRelatedByLastTurn instanceof Persistent) {
-              $this->aTurnRelatedByLastTurn->clearAllReferences($deep);
+            if ($this->aCardRelatedByDiscard instanceof Persistent) {
+              $this->aCardRelatedByDiscard->clearAllReferences($deep);
             }
-            if ($this->aPlayerRelatedByPlayerOne instanceof Persistent) {
-              $this->aPlayerRelatedByPlayerOne->clearAllReferences($deep);
+            if ($this->aCardRelatedByDraw instanceof Persistent) {
+              $this->aCardRelatedByDraw->clearAllReferences($deep);
             }
-            if ($this->aPlayerRelatedByPlayerTwo instanceof Persistent) {
-              $this->aPlayerRelatedByPlayerTwo->clearAllReferences($deep);
+            if ($this->aTurnRelatedByLastTurnId instanceof Persistent) {
+              $this->aTurnRelatedByLastTurnId->clearAllReferences($deep);
+            }
+            if ($this->aPlayerRelatedByPlayerOneId instanceof Persistent) {
+              $this->aPlayerRelatedByPlayerOneId->clearAllReferences($deep);
+            }
+            if ($this->aPlayerRelatedByPlayerTwoId instanceof Persistent) {
+              $this->aPlayerRelatedByPlayerTwoId->clearAllReferences($deep);
+            }
+            if ($this->aCardRelatedByShop instanceof Persistent) {
+              $this->aCardRelatedByShop->clearAllReferences($deep);
             }
 
             $this->alreadyInClearAllReferencesDeep = false;
@@ -1806,9 +1948,12 @@ abstract class BaseGame extends BaseObject implements Persistent
             $this->collTurnsRelatedByGameId->clearIterator();
         }
         $this->collTurnsRelatedByGameId = null;
-        $this->aTurnRelatedByLastTurn = null;
-        $this->aPlayerRelatedByPlayerOne = null;
-        $this->aPlayerRelatedByPlayerTwo = null;
+        $this->aCardRelatedByDiscard = null;
+        $this->aCardRelatedByDraw = null;
+        $this->aTurnRelatedByLastTurnId = null;
+        $this->aPlayerRelatedByPlayerOneId = null;
+        $this->aPlayerRelatedByPlayerTwoId = null;
+        $this->aCardRelatedByShop = null;
     }
 
     /**

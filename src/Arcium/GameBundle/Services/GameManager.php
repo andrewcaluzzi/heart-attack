@@ -3,6 +3,7 @@
 namespace Arcium\GameBundle\Services;
 
 use Arcium\GameBundle\Model;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class GameManager
 {
@@ -38,26 +39,29 @@ class GameManager
      ****************************/
 
 
-    /** @var Model\Deck $deck */
-    private $deck;
+    /** @var Model\CardCollection $draw */
+    private $draw;
 
-    /** @var Model\Deck $discard */
+    /** @var Model\CardCollection $discard */
     private $discard;
 
-    /** @var Model\Deck $shop */
+    /** @var Model\CardCollection $shop */
     private $shop;
 
     /** @var Model\Game $game */
     private $game;
 
-    /** @var Model\Deck $playerOneHand */
+    /** @var Model\CardCollection $playerOneHand */
     private $playerOneHand;
 
-    /** @var Model\Deck $playerTwoHand */
+    /** @var Model\CardCollection $playerTwoHand */
     private $playerTwoHand;
 
     /** @var Model\Turn $lastTurn */
     private $lastTurn;
+
+    /** @var int $currentPlayer */
+    private $currentPlayer;
 
     /**
      * @param Model\Game $game The game object to use
@@ -78,54 +82,73 @@ class GameManager
     {
         // setup the deck and shuffle
         $fullDeck = self::getFullDeck(self::getStartingCards());
-        $this->deck = new Model\Deck($fullDeck);
-        $this->deck->shuffle();
+        $this->draw = new Model\CardCollection($fullDeck);
+        $this->draw->shuffle();
 
         // setup shop
-        $this->shop = new Model\Deck($this->deck->draw(5));
+        $this->shop = new Model\CardCollection($this->draw->draw(5));
 
         // setup empty discard
-        $this->discard = new Model\Deck(array());
+        $this->discard = new Model\CardCollection(array());
 
         // setup player hands
-        $this->playerOneHand = new Model\Deck($this->deck->draw(5));
-        $this->playerTwoHand = new Model\Deck($this->deck->draw(5));
+        $this->playerOneHand = new Model\CardCollection($this->draw->draw(5));
+        $this->playerTwoHand = new Model\CardCollection($this->draw->draw(5));
+
+        // setup last turn
+        ##$this->lastTurn = new Model\Turn();
     }
 
     private function loadExistingGame()
     {
-        // load and setup deck
-        $this->deck = new Model\Deck($this->game->getDeck());
-
-        // load and setup shop
-        $this->shop = new Model\Deck($this->game->getShop());
+        // load and setup draw
+        $this->draw = new Model\CardCollection($this->game->getDraw()->getCards());
 
         // load and setup discard
-        $this->discard = new Model\Deck($this->game->getDiscard());
+        $this->discard = new Model\CardCollection($this->game->getDiscard()->getCards());
+
+        // load and setup shop
+        $this->shop = new Model\CardCollection($this->game->getShop()->getCards());
 
         // load and setup player hands
-        $this->playerOneHand = new Model\Deck($this->game->getPlayerOneHand());
-        $this->playerTwoHand = new Model\Deck($this->game->getPlayerTwoHand());
+        $this->playerOneHand = new Model\CardCollection($this->game->getPlayerOneHand()->getCards());
+        $this->playerTwoHand = new Model\CardCollection($this->game->getPlayerTwoHand()->getCards());
 
         // load and setup last turn (if exists)
-        $this->lastTurn = $this->game->getTurnRelatedByLastTurn();
+        $this->lastTurn = $this->game->getLastTurn();
     }
 
     public function handleTurn(Model\Turn $turn)
     {
+        $player = $turn->getPlayer();
 
+        switch($player->getId())
+        {
+            case $this->game->getPlayerOneId():
+                $this->currentPlayer = 1;
+                break;
+            case $this->game->getPlayerTwoId():
+                $this->currentPlayer = 2;
+                break;
+            default:
+                throw new \Exception("Player ID {$player->getId()} in turn object doesn't match game's stored players");
+        }
+
+        var_dump($this, $turn, $this->lastTurn);die;
+
+        ## TODO: validate turn, perform action
     }
 
     public function save()
     {
-        ## TODO: handle saving of the game object
-        // save player hands, deck, discard, etc
-        $this->game->setDeck($this->deck->getCards());
-        $this->game->setShop($this->shop->getCards());
+        $this->game->setDraw($this->draw->getCards());
         $this->game->setDiscard($this->discard->getCards());
+        $this->game->setShop($this->shop->getCards());
         $this->game->setPlayerOneHand($this->playerOneHand->getCards());
         $this->game->setPlayerTwoHand($this->playerTwoHand->getCards());
-        $this->game->setLastTurn($this->lastTurn);
+
+        if($this->lastTurn)
+            $this->game->setLastTurn($this->lastTurn);
 
         try
         {

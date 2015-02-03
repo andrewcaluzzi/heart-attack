@@ -12,59 +12,58 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use Arcium\GameBundle\Model\Card;
+use Arcium\GameBundle\Model\CardPeer;
+use Arcium\GameBundle\Model\CardQuery;
 use Arcium\GameBundle\Model\Game;
-use Arcium\GameBundle\Model\Player;
-use Arcium\GameBundle\Model\Turn;
-use Arcium\GameBundle\Model\TurnPeer;
-use Arcium\GameBundle\Model\TurnQuery;
 
 /**
- * @method TurnQuery orderById($order = Criteria::ASC) Order by the id column
- * @method TurnQuery orderByGameId($order = Criteria::ASC) Order by the game_id column
- * @method TurnQuery orderByPlayerId($order = Criteria::ASC) Order by the player_id column
- * @method TurnQuery orderByPhase($order = Criteria::ASC) Order by the phase column
- * @method TurnQuery orderByCards($order = Criteria::ASC) Order by the cards column
+ * @method CardQuery orderById($order = Criteria::ASC) Order by the id column
+ * @method CardQuery orderByGameId($order = Criteria::ASC) Order by the game_id column
+ * @method CardQuery orderByPlayerId($order = Criteria::ASC) Order by the player_id column
+ * @method CardQuery orderByCards($order = Criteria::ASC) Order by the cards column
+ * @method CardQuery orderByType($order = Criteria::ASC) Order by the type column
  *
- * @method TurnQuery groupById() Group by the id column
- * @method TurnQuery groupByGameId() Group by the game_id column
- * @method TurnQuery groupByPlayerId() Group by the player_id column
- * @method TurnQuery groupByPhase() Group by the phase column
- * @method TurnQuery groupByCards() Group by the cards column
+ * @method CardQuery groupById() Group by the id column
+ * @method CardQuery groupByGameId() Group by the game_id column
+ * @method CardQuery groupByPlayerId() Group by the player_id column
+ * @method CardQuery groupByCards() Group by the cards column
+ * @method CardQuery groupByType() Group by the type column
  *
- * @method TurnQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method TurnQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method TurnQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method CardQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method CardQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method CardQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method TurnQuery leftJoinGameRelatedByGameId($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByGameId relation
- * @method TurnQuery rightJoinGameRelatedByGameId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByGameId relation
- * @method TurnQuery innerJoinGameRelatedByGameId($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByGameId relation
+ * @method CardQuery leftJoinGameRelatedByDiscard($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByDiscard relation
+ * @method CardQuery rightJoinGameRelatedByDiscard($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByDiscard relation
+ * @method CardQuery innerJoinGameRelatedByDiscard($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByDiscard relation
  *
- * @method TurnQuery leftJoinPlayer($relationAlias = null) Adds a LEFT JOIN clause to the query using the Player relation
- * @method TurnQuery rightJoinPlayer($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Player relation
- * @method TurnQuery innerJoinPlayer($relationAlias = null) Adds a INNER JOIN clause to the query using the Player relation
+ * @method CardQuery leftJoinGameRelatedByDraw($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByDraw relation
+ * @method CardQuery rightJoinGameRelatedByDraw($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByDraw relation
+ * @method CardQuery innerJoinGameRelatedByDraw($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByDraw relation
  *
- * @method TurnQuery leftJoinGameRelatedByLastTurnId($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByLastTurnId relation
- * @method TurnQuery rightJoinGameRelatedByLastTurnId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByLastTurnId relation
- * @method TurnQuery innerJoinGameRelatedByLastTurnId($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByLastTurnId relation
+ * @method CardQuery leftJoinGameRelatedByShop($relationAlias = null) Adds a LEFT JOIN clause to the query using the GameRelatedByShop relation
+ * @method CardQuery rightJoinGameRelatedByShop($relationAlias = null) Adds a RIGHT JOIN clause to the query using the GameRelatedByShop relation
+ * @method CardQuery innerJoinGameRelatedByShop($relationAlias = null) Adds a INNER JOIN clause to the query using the GameRelatedByShop relation
  *
- * @method Turn findOne(PropelPDO $con = null) Return the first Turn matching the query
- * @method Turn findOneOrCreate(PropelPDO $con = null) Return the first Turn matching the query, or a new Turn object populated from the query conditions when no match is found
+ * @method Card findOne(PropelPDO $con = null) Return the first Card matching the query
+ * @method Card findOneOrCreate(PropelPDO $con = null) Return the first Card matching the query, or a new Card object populated from the query conditions when no match is found
  *
- * @method Turn findOneByGameId(int $game_id) Return the first Turn filtered by the game_id column
- * @method Turn findOneByPlayerId(int $player_id) Return the first Turn filtered by the player_id column
- * @method Turn findOneByPhase(string $phase) Return the first Turn filtered by the phase column
- * @method Turn findOneByCards(string $cards) Return the first Turn filtered by the cards column
+ * @method Card findOneByGameId(int $game_id) Return the first Card filtered by the game_id column
+ * @method Card findOneByPlayerId(int $player_id) Return the first Card filtered by the player_id column
+ * @method Card findOneByCards(string $cards) Return the first Card filtered by the cards column
+ * @method Card findOneByType(string $type) Return the first Card filtered by the type column
  *
- * @method array findById(int $id) Return Turn objects filtered by the id column
- * @method array findByGameId(int $game_id) Return Turn objects filtered by the game_id column
- * @method array findByPlayerId(int $player_id) Return Turn objects filtered by the player_id column
- * @method array findByPhase(string $phase) Return Turn objects filtered by the phase column
- * @method array findByCards(string $cards) Return Turn objects filtered by the cards column
+ * @method array findById(int $id) Return Card objects filtered by the id column
+ * @method array findByGameId(int $game_id) Return Card objects filtered by the game_id column
+ * @method array findByPlayerId(int $player_id) Return Card objects filtered by the player_id column
+ * @method array findByCards(string $cards) Return Card objects filtered by the cards column
+ * @method array findByType(string $type) Return Card objects filtered by the type column
  */
-abstract class BaseTurnQuery extends ModelCriteria
+abstract class BaseCardQuery extends ModelCriteria
 {
     /**
-     * Initializes internal state of BaseTurnQuery object.
+     * Initializes internal state of BaseCardQuery object.
      *
      * @param     string $dbName The dabase name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
@@ -76,25 +75,25 @@ abstract class BaseTurnQuery extends ModelCriteria
             $dbName = 'default';
         }
         if (null === $modelName) {
-            $modelName = 'Arcium\\GameBundle\\Model\\Turn';
+            $modelName = 'Arcium\\GameBundle\\Model\\Card';
         }
         parent::__construct($dbName, $modelName, $modelAlias);
     }
 
     /**
-     * Returns a new TurnQuery object.
+     * Returns a new CardQuery object.
      *
      * @param     string $modelAlias The alias of a model in the query
-     * @param   TurnQuery|Criteria $criteria Optional Criteria to build the query from
+     * @param   CardQuery|Criteria $criteria Optional Criteria to build the query from
      *
-     * @return TurnQuery
+     * @return CardQuery
      */
     public static function create($modelAlias = null, $criteria = null)
     {
-        if ($criteria instanceof TurnQuery) {
+        if ($criteria instanceof CardQuery) {
             return $criteria;
         }
-        $query = new TurnQuery(null, null, $modelAlias);
+        $query = new CardQuery(null, null, $modelAlias);
 
         if ($criteria instanceof Criteria) {
             $query->mergeWith($criteria);
@@ -115,19 +114,19 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param     PropelPDO $con an optional connection object
      *
-     * @return   Turn|Turn[]|mixed the result, formatted by the current formatter
+     * @return   Card|Card[]|mixed the result, formatted by the current formatter
      */
     public function findPk($key, $con = null)
     {
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = TurnPeer::getInstanceFromPool((string) $key))) && !$this->formatter) {
+        if ((null !== ($obj = CardPeer::getInstanceFromPool((string) $key))) && !$this->formatter) {
             // the object is already in the instance pool
             return $obj;
         }
         if ($con === null) {
-            $con = Propel::getConnection(TurnPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(CardPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
         $this->basePreSelect($con);
         if ($this->formatter || $this->modelAlias || $this->with || $this->select
@@ -145,7 +144,7 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return                 Turn A model object, or null if the key is not found
+     * @return                 Card A model object, or null if the key is not found
      * @throws PropelException
      */
      public function findOneById($key, $con = null)
@@ -160,12 +159,12 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return                 Turn A model object, or null if the key is not found
+     * @return                 Card A model object, or null if the key is not found
      * @throws PropelException
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `id`, `game_id`, `player_id`, `phase`, `cards` FROM `turns` WHERE `id` = :p0';
+        $sql = 'SELECT `id`, `game_id`, `player_id`, `cards`, `type` FROM `cards` WHERE `id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -176,9 +175,9 @@ abstract class BaseTurnQuery extends ModelCriteria
         }
         $obj = null;
         if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $obj = new Turn();
+            $obj = new Card();
             $obj->hydrate($row);
-            TurnPeer::addInstanceToPool($obj, (string) $key);
+            CardPeer::addInstanceToPool($obj, (string) $key);
         }
         $stmt->closeCursor();
 
@@ -191,7 +190,7 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return Turn|Turn[]|mixed the result, formatted by the current formatter
+     * @return Card|Card[]|mixed the result, formatted by the current formatter
      */
     protected function findPkComplex($key, $con)
     {
@@ -212,7 +211,7 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param     array $keys Primary keys to use for the query
      * @param     PropelPDO $con an optional connection object
      *
-     * @return PropelObjectCollection|Turn[]|mixed the list of results, formatted by the current formatter
+     * @return PropelObjectCollection|Card[]|mixed the list of results, formatted by the current formatter
      */
     public function findPks($keys, $con = null)
     {
@@ -233,12 +232,12 @@ abstract class BaseTurnQuery extends ModelCriteria
      *
      * @param     mixed $key Primary key to use for the query
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(TurnPeer::ID, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(CardPeer::ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -246,12 +245,12 @@ abstract class BaseTurnQuery extends ModelCriteria
      *
      * @param     array $keys The list of primary key to use for the query
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(TurnPeer::ID, $keys, Criteria::IN);
+        return $this->addUsingAlias(CardPeer::ID, $keys, Criteria::IN);
     }
 
     /**
@@ -271,18 +270,18 @@ abstract class BaseTurnQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterById($id = null, $comparison = null)
     {
         if (is_array($id)) {
             $useMinMax = false;
             if (isset($id['min'])) {
-                $this->addUsingAlias(TurnPeer::ID, $id['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(CardPeer::ID, $id['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($id['max'])) {
-                $this->addUsingAlias(TurnPeer::ID, $id['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(CardPeer::ID, $id['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -293,7 +292,7 @@ abstract class BaseTurnQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(TurnPeer::ID, $id, $comparison);
+        return $this->addUsingAlias(CardPeer::ID, $id, $comparison);
     }
 
     /**
@@ -307,26 +306,24 @@ abstract class BaseTurnQuery extends ModelCriteria
      * $query->filterByGameId(array('max' => 12)); // WHERE game_id <= 12
      * </code>
      *
-     * @see       filterByGameRelatedByGameId()
-     *
      * @param     mixed $gameId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterByGameId($gameId = null, $comparison = null)
     {
         if (is_array($gameId)) {
             $useMinMax = false;
             if (isset($gameId['min'])) {
-                $this->addUsingAlias(TurnPeer::GAME_ID, $gameId['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(CardPeer::GAME_ID, $gameId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($gameId['max'])) {
-                $this->addUsingAlias(TurnPeer::GAME_ID, $gameId['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(CardPeer::GAME_ID, $gameId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -337,7 +334,7 @@ abstract class BaseTurnQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(TurnPeer::GAME_ID, $gameId, $comparison);
+        return $this->addUsingAlias(CardPeer::GAME_ID, $gameId, $comparison);
     }
 
     /**
@@ -351,26 +348,24 @@ abstract class BaseTurnQuery extends ModelCriteria
      * $query->filterByPlayerId(array('max' => 12)); // WHERE player_id <= 12
      * </code>
      *
-     * @see       filterByPlayer()
-     *
      * @param     mixed $playerId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterByPlayerId($playerId = null, $comparison = null)
     {
         if (is_array($playerId)) {
             $useMinMax = false;
             if (isset($playerId['min'])) {
-                $this->addUsingAlias(TurnPeer::PLAYER_ID, $playerId['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(CardPeer::PLAYER_ID, $playerId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($playerId['max'])) {
-                $this->addUsingAlias(TurnPeer::PLAYER_ID, $playerId['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(CardPeer::PLAYER_ID, $playerId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -381,36 +376,7 @@ abstract class BaseTurnQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(TurnPeer::PLAYER_ID, $playerId, $comparison);
-    }
-
-    /**
-     * Filter the query on the phase column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByPhase('fooValue');   // WHERE phase = 'fooValue'
-     * $query->filterByPhase('%fooValue%'); // WHERE phase LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $phase The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return TurnQuery The current query, for fluid interface
-     */
-    public function filterByPhase($phase = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($phase)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $phase)) {
-                $phase = str_replace('*', '%', $phase);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(TurnPeer::PHASE, $phase, $comparison);
+        return $this->addUsingAlias(CardPeer::PLAYER_ID, $playerId, $comparison);
     }
 
     /**
@@ -426,7 +392,7 @@ abstract class BaseTurnQuery extends ModelCriteria
      *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
     public function filterByCards($cards = null, $comparison = null)
     {
@@ -439,159 +405,36 @@ abstract class BaseTurnQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(TurnPeer::CARDS, $cards, $comparison);
+        return $this->addUsingAlias(CardPeer::CARDS, $cards, $comparison);
     }
 
     /**
-     * Filter the query by a related Game object
+     * Filter the query on the type column
      *
-     * @param   Game|PropelObjectCollection $game The related object(s) to use as filter
+     * Example usage:
+     * <code>
+     * $query->filterByType('fooValue');   // WHERE type = 'fooValue'
+     * $query->filterByType('%fooValue%'); // WHERE type LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $type The value to use as filter.
+     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return                 TurnQuery The current query, for fluid interface
-     * @throws PropelException - if the provided filter is invalid.
+     * @return CardQuery The current query, for fluid interface
      */
-    public function filterByGameRelatedByGameId($game, $comparison = null)
+    public function filterByType($type = null, $comparison = null)
     {
-        if ($game instanceof Game) {
-            return $this
-                ->addUsingAlias(TurnPeer::GAME_ID, $game->getId(), $comparison);
-        } elseif ($game instanceof PropelObjectCollection) {
-            if (null === $comparison) {
+        if (null === $comparison) {
+            if (is_array($type)) {
                 $comparison = Criteria::IN;
+            } elseif (preg_match('/[\%\*]/', $type)) {
+                $type = str_replace('*', '%', $type);
+                $comparison = Criteria::LIKE;
             }
-
-            return $this
-                ->addUsingAlias(TurnPeer::GAME_ID, $game->toKeyValue('PrimaryKey', 'Id'), $comparison);
-        } else {
-            throw new PropelException('filterByGameRelatedByGameId() only accepts arguments of type Game or PropelCollection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the GameRelatedByGameId relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return TurnQuery The current query, for fluid interface
-     */
-    public function joinGameRelatedByGameId($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('GameRelatedByGameId');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
         }
 
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'GameRelatedByGameId');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the GameRelatedByGameId relation Game object
-     *
-     * @see       useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
-     */
-    public function useGameRelatedByGameIdQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        return $this
-            ->joinGameRelatedByGameId($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByGameId', '\Arcium\GameBundle\Model\GameQuery');
-    }
-
-    /**
-     * Filter the query by a related Player object
-     *
-     * @param   Player|PropelObjectCollection $player The related object(s) to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return                 TurnQuery The current query, for fluid interface
-     * @throws PropelException - if the provided filter is invalid.
-     */
-    public function filterByPlayer($player, $comparison = null)
-    {
-        if ($player instanceof Player) {
-            return $this
-                ->addUsingAlias(TurnPeer::PLAYER_ID, $player->getId(), $comparison);
-        } elseif ($player instanceof PropelObjectCollection) {
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-
-            return $this
-                ->addUsingAlias(TurnPeer::PLAYER_ID, $player->toKeyValue('PrimaryKey', 'Id'), $comparison);
-        } else {
-            throw new PropelException('filterByPlayer() only accepts arguments of type Player or PropelCollection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the Player relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return TurnQuery The current query, for fluid interface
-     */
-    public function joinPlayer($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('Player');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'Player');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the Player relation Player object
-     *
-     * @see       useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return   \Arcium\GameBundle\Model\PlayerQuery A secondary query class using the current class as primary query
-     */
-    public function usePlayerQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        return $this
-            ->joinPlayer($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'Player', '\Arcium\GameBundle\Model\PlayerQuery');
+        return $this->addUsingAlias(CardPeer::TYPE, $type, $comparison);
     }
 
     /**
@@ -600,36 +443,36 @@ abstract class BaseTurnQuery extends ModelCriteria
      * @param   Game|PropelObjectCollection $game  the related object to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return                 TurnQuery The current query, for fluid interface
+     * @return                 CardQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
-    public function filterByGameRelatedByLastTurnId($game, $comparison = null)
+    public function filterByGameRelatedByDiscard($game, $comparison = null)
     {
         if ($game instanceof Game) {
             return $this
-                ->addUsingAlias(TurnPeer::ID, $game->getLastTurnId(), $comparison);
+                ->addUsingAlias(CardPeer::ID, $game->getDiscard(), $comparison);
         } elseif ($game instanceof PropelObjectCollection) {
             return $this
-                ->useGameRelatedByLastTurnIdQuery()
+                ->useGameRelatedByDiscardQuery()
                 ->filterByPrimaryKeys($game->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByGameRelatedByLastTurnId() only accepts arguments of type Game or PropelCollection');
+            throw new PropelException('filterByGameRelatedByDiscard() only accepts arguments of type Game or PropelCollection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the GameRelatedByLastTurnId relation
+     * Adds a JOIN clause to the query using the GameRelatedByDiscard relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
-    public function joinGameRelatedByLastTurnId($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinGameRelatedByDiscard($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('GameRelatedByLastTurnId');
+        $relationMap = $tableMap->getRelation('GameRelatedByDiscard');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -644,14 +487,14 @@ abstract class BaseTurnQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'GameRelatedByLastTurnId');
+            $this->addJoinObject($join, 'GameRelatedByDiscard');
         }
 
         return $this;
     }
 
     /**
-     * Use the GameRelatedByLastTurnId relation Game object
+     * Use the GameRelatedByDiscard relation Game object
      *
      * @see       useQuery()
      *
@@ -661,24 +504,172 @@ abstract class BaseTurnQuery extends ModelCriteria
      *
      * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
      */
-    public function useGameRelatedByLastTurnIdQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useGameRelatedByDiscardQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinGameRelatedByLastTurnId($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByLastTurnId', '\Arcium\GameBundle\Model\GameQuery');
+            ->joinGameRelatedByDiscard($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByDiscard', '\Arcium\GameBundle\Model\GameQuery');
+    }
+
+    /**
+     * Filter the query by a related Game object
+     *
+     * @param   Game|PropelObjectCollection $game  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 CardQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByGameRelatedByDraw($game, $comparison = null)
+    {
+        if ($game instanceof Game) {
+            return $this
+                ->addUsingAlias(CardPeer::ID, $game->getDraw(), $comparison);
+        } elseif ($game instanceof PropelObjectCollection) {
+            return $this
+                ->useGameRelatedByDrawQuery()
+                ->filterByPrimaryKeys($game->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByGameRelatedByDraw() only accepts arguments of type Game or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the GameRelatedByDraw relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return CardQuery The current query, for fluid interface
+     */
+    public function joinGameRelatedByDraw($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('GameRelatedByDraw');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'GameRelatedByDraw');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the GameRelatedByDraw relation Game object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
+     */
+    public function useGameRelatedByDrawQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinGameRelatedByDraw($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByDraw', '\Arcium\GameBundle\Model\GameQuery');
+    }
+
+    /**
+     * Filter the query by a related Game object
+     *
+     * @param   Game|PropelObjectCollection $game  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 CardQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByGameRelatedByShop($game, $comparison = null)
+    {
+        if ($game instanceof Game) {
+            return $this
+                ->addUsingAlias(CardPeer::ID, $game->getShop(), $comparison);
+        } elseif ($game instanceof PropelObjectCollection) {
+            return $this
+                ->useGameRelatedByShopQuery()
+                ->filterByPrimaryKeys($game->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByGameRelatedByShop() only accepts arguments of type Game or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the GameRelatedByShop relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return CardQuery The current query, for fluid interface
+     */
+    public function joinGameRelatedByShop($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('GameRelatedByShop');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'GameRelatedByShop');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the GameRelatedByShop relation Game object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\GameQuery A secondary query class using the current class as primary query
+     */
+    public function useGameRelatedByShopQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinGameRelatedByShop($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'GameRelatedByShop', '\Arcium\GameBundle\Model\GameQuery');
     }
 
     /**
      * Exclude object from result
      *
-     * @param   Turn $turn Object to remove from the list of results
+     * @param   Card $card Object to remove from the list of results
      *
-     * @return TurnQuery The current query, for fluid interface
+     * @return CardQuery The current query, for fluid interface
      */
-    public function prune($turn = null)
+    public function prune($card = null)
     {
-        if ($turn) {
-            $this->addUsingAlias(TurnPeer::ID, $turn->getId(), Criteria::NOT_EQUAL);
+        if ($card) {
+            $this->addUsingAlias(CardPeer::ID, $card->getId(), Criteria::NOT_EQUAL);
         }
 
         return $this;

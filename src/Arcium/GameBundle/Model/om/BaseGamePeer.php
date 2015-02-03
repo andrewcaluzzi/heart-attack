@@ -9,6 +9,7 @@ use \PDOStatement;
 use \Propel;
 use \PropelException;
 use \PropelPDO;
+use Arcium\GameBundle\Model\CardPeer;
 use Arcium\GameBundle\Model\Game;
 use Arcium\GameBundle\Model\GamePeer;
 use Arcium\GameBundle\Model\PlayerPeer;
@@ -31,19 +32,19 @@ abstract class BaseGamePeer
     const TM_CLASS = 'Arcium\\GameBundle\\Model\\map\\GameTableMap';
 
     /** The total number of columns. */
-    const NUM_COLUMNS = 9;
+    const NUM_COLUMNS = 7;
 
     /** The number of lazy-loaded columns. */
     const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /** The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS) */
-    const NUM_HYDRATE_COLUMNS = 9;
+    const NUM_HYDRATE_COLUMNS = 7;
 
     /** the column name for the id field */
     const ID = 'games.id';
 
-    /** the column name for the deck field */
-    const DECK = 'games.deck';
+    /** the column name for the draw field */
+    const DRAW = 'games.draw';
 
     /** the column name for the discard field */
     const DISCARD = 'games.discard';
@@ -51,20 +52,14 @@ abstract class BaseGamePeer
     /** the column name for the shop field */
     const SHOP = 'games.shop';
 
-    /** the column name for the player_one field */
-    const PLAYER_ONE = 'games.player_one';
+    /** the column name for the player_one_id field */
+    const PLAYER_ONE_ID = 'games.player_one_id';
 
-    /** the column name for the player_one_hand field */
-    const PLAYER_ONE_HAND = 'games.player_one_hand';
+    /** the column name for the player_two_id field */
+    const PLAYER_TWO_ID = 'games.player_two_id';
 
-    /** the column name for the player_two field */
-    const PLAYER_TWO = 'games.player_two';
-
-    /** the column name for the player_two_hand field */
-    const PLAYER_TWO_HAND = 'games.player_two_hand';
-
-    /** the column name for the last_turn field */
-    const LAST_TURN = 'games.last_turn';
+    /** the column name for the last_turn_id field */
+    const LAST_TURN_ID = 'games.last_turn_id';
 
     /** The default string format for model objects of the related table **/
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -85,12 +80,12 @@ abstract class BaseGamePeer
      * e.g. GamePeer::$fieldNames[GamePeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('Id', 'Deck', 'Discard', 'Shop', 'PlayerOne', 'PlayerOneHand', 'PlayerTwo', 'PlayerTwoHand', 'LastTurn', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'deck', 'discard', 'shop', 'playerOne', 'playerOneHand', 'playerTwo', 'playerTwoHand', 'lastTurn', ),
-        BasePeer::TYPE_COLNAME => array (GamePeer::ID, GamePeer::DECK, GamePeer::DISCARD, GamePeer::SHOP, GamePeer::PLAYER_ONE, GamePeer::PLAYER_ONE_HAND, GamePeer::PLAYER_TWO, GamePeer::PLAYER_TWO_HAND, GamePeer::LAST_TURN, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'DECK', 'DISCARD', 'SHOP', 'PLAYER_ONE', 'PLAYER_ONE_HAND', 'PLAYER_TWO', 'PLAYER_TWO_HAND', 'LAST_TURN', ),
-        BasePeer::TYPE_FIELDNAME => array ('id', 'deck', 'discard', 'shop', 'player_one', 'player_one_hand', 'player_two', 'player_two_hand', 'last_turn', ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, 7, 8, )
+        BasePeer::TYPE_PHPNAME => array ('Id', 'Draw', 'Discard', 'Shop', 'PlayerOneId', 'PlayerTwoId', 'LastTurnId', ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'draw', 'discard', 'shop', 'playerOneId', 'playerTwoId', 'lastTurnId', ),
+        BasePeer::TYPE_COLNAME => array (GamePeer::ID, GamePeer::DRAW, GamePeer::DISCARD, GamePeer::SHOP, GamePeer::PLAYER_ONE_ID, GamePeer::PLAYER_TWO_ID, GamePeer::LAST_TURN_ID, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'DRAW', 'DISCARD', 'SHOP', 'PLAYER_ONE_ID', 'PLAYER_TWO_ID', 'LAST_TURN_ID', ),
+        BasePeer::TYPE_FIELDNAME => array ('id', 'draw', 'discard', 'shop', 'player_one_id', 'player_two_id', 'last_turn_id', ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -100,12 +95,12 @@ abstract class BaseGamePeer
      * e.g. GamePeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Deck' => 1, 'Discard' => 2, 'Shop' => 3, 'PlayerOne' => 4, 'PlayerOneHand' => 5, 'PlayerTwo' => 6, 'PlayerTwoHand' => 7, 'LastTurn' => 8, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'deck' => 1, 'discard' => 2, 'shop' => 3, 'playerOne' => 4, 'playerOneHand' => 5, 'playerTwo' => 6, 'playerTwoHand' => 7, 'lastTurn' => 8, ),
-        BasePeer::TYPE_COLNAME => array (GamePeer::ID => 0, GamePeer::DECK => 1, GamePeer::DISCARD => 2, GamePeer::SHOP => 3, GamePeer::PLAYER_ONE => 4, GamePeer::PLAYER_ONE_HAND => 5, GamePeer::PLAYER_TWO => 6, GamePeer::PLAYER_TWO_HAND => 7, GamePeer::LAST_TURN => 8, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'DECK' => 1, 'DISCARD' => 2, 'SHOP' => 3, 'PLAYER_ONE' => 4, 'PLAYER_ONE_HAND' => 5, 'PLAYER_TWO' => 6, 'PLAYER_TWO_HAND' => 7, 'LAST_TURN' => 8, ),
-        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'deck' => 1, 'discard' => 2, 'shop' => 3, 'player_one' => 4, 'player_one_hand' => 5, 'player_two' => 6, 'player_two_hand' => 7, 'last_turn' => 8, ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, 7, 8, )
+        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Draw' => 1, 'Discard' => 2, 'Shop' => 3, 'PlayerOneId' => 4, 'PlayerTwoId' => 5, 'LastTurnId' => 6, ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'draw' => 1, 'discard' => 2, 'shop' => 3, 'playerOneId' => 4, 'playerTwoId' => 5, 'lastTurnId' => 6, ),
+        BasePeer::TYPE_COLNAME => array (GamePeer::ID => 0, GamePeer::DRAW => 1, GamePeer::DISCARD => 2, GamePeer::SHOP => 3, GamePeer::PLAYER_ONE_ID => 4, GamePeer::PLAYER_TWO_ID => 5, GamePeer::LAST_TURN_ID => 6, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'DRAW' => 1, 'DISCARD' => 2, 'SHOP' => 3, 'PLAYER_ONE_ID' => 4, 'PLAYER_TWO_ID' => 5, 'LAST_TURN_ID' => 6, ),
+        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'draw' => 1, 'discard' => 2, 'shop' => 3, 'player_one_id' => 4, 'player_two_id' => 5, 'last_turn_id' => 6, ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -180,24 +175,20 @@ abstract class BaseGamePeer
     {
         if (null === $alias) {
             $criteria->addSelectColumn(GamePeer::ID);
-            $criteria->addSelectColumn(GamePeer::DECK);
+            $criteria->addSelectColumn(GamePeer::DRAW);
             $criteria->addSelectColumn(GamePeer::DISCARD);
             $criteria->addSelectColumn(GamePeer::SHOP);
-            $criteria->addSelectColumn(GamePeer::PLAYER_ONE);
-            $criteria->addSelectColumn(GamePeer::PLAYER_ONE_HAND);
-            $criteria->addSelectColumn(GamePeer::PLAYER_TWO);
-            $criteria->addSelectColumn(GamePeer::PLAYER_TWO_HAND);
-            $criteria->addSelectColumn(GamePeer::LAST_TURN);
+            $criteria->addSelectColumn(GamePeer::PLAYER_ONE_ID);
+            $criteria->addSelectColumn(GamePeer::PLAYER_TWO_ID);
+            $criteria->addSelectColumn(GamePeer::LAST_TURN_ID);
         } else {
             $criteria->addSelectColumn($alias . '.id');
-            $criteria->addSelectColumn($alias . '.deck');
+            $criteria->addSelectColumn($alias . '.draw');
             $criteria->addSelectColumn($alias . '.discard');
             $criteria->addSelectColumn($alias . '.shop');
-            $criteria->addSelectColumn($alias . '.player_one');
-            $criteria->addSelectColumn($alias . '.player_one_hand');
-            $criteria->addSelectColumn($alias . '.player_two');
-            $criteria->addSelectColumn($alias . '.player_two_hand');
-            $criteria->addSelectColumn($alias . '.last_turn');
+            $criteria->addSelectColumn($alias . '.player_one_id');
+            $criteria->addSelectColumn($alias . '.player_two_id');
+            $criteria->addSelectColumn($alias . '.last_turn_id');
         }
     }
 
@@ -500,7 +491,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related TurnRelatedByLastTurn table
+     * Returns the number of rows matching criteria, joining the related CardRelatedByDiscard table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -508,7 +499,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinTurnRelatedByLastTurn(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinCardRelatedByDiscard(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -535,7 +526,7 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -551,7 +542,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerOne table
+     * Returns the number of rows matching criteria, joining the related CardRelatedByDraw table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -559,7 +550,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinPlayerRelatedByPlayerOne(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinCardRelatedByDraw(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -586,7 +577,7 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -602,7 +593,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerTwo table
+     * Returns the number of rows matching criteria, joining the related TurnRelatedByLastTurnId table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -610,7 +601,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinPlayerRelatedByPlayerTwo(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinTurnRelatedByLastTurnId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -637,7 +628,7 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -649,6 +640,293 @@ abstract class BaseGamePeer
         $stmt->closeCursor();
 
         return $count;
+    }
+
+
+    /**
+     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerOneId table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinPlayerRelatedByPlayerOneId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerTwoId table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinPlayerRelatedByPlayerTwoId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Returns the number of rows matching criteria, joining the related CardRelatedByShop table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinCardRelatedByShop(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with their Card objects.
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinCardRelatedByDiscard(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
+        CardPeer::addSelectColumns($criteria);
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if $obj1 already loaded
+
+            $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol);
+            if ($key2 !== null) {
+                $obj2 = CardPeer::getInstanceFromPool($key2);
+                if (!$obj2) {
+
+                    $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if obj2 already loaded
+
+                // Add the $obj1 (Game) to $obj2 (Card)
+                $obj2->addGameRelatedByDiscard($obj1);
+
+            } // if joined row was not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with their Card objects.
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinCardRelatedByDraw(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
+        CardPeer::addSelectColumns($criteria);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if $obj1 already loaded
+
+            $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol);
+            if ($key2 !== null) {
+                $obj2 = CardPeer::getInstanceFromPool($key2);
+                if (!$obj2) {
+
+                    $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if obj2 already loaded
+
+                // Add the $obj1 (Game) to $obj2 (Card)
+                $obj2->addGameRelatedByDraw($obj1);
+
+            } // if joined row was not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
     }
 
 
@@ -661,7 +939,7 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinTurnRelatedByLastTurn(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinTurnRelatedByLastTurnId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -674,7 +952,7 @@ abstract class BaseGamePeer
         $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
         TurnPeer::addSelectColumns($criteria);
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
@@ -707,7 +985,7 @@ abstract class BaseGamePeer
                 } // if obj2 already loaded
 
                 // Add the $obj1 (Game) to $obj2 (Turn)
-                $obj2->addGameRelatedByLastTurn($obj1);
+                $obj2->addGameRelatedByLastTurnId($obj1);
 
             } // if joined row was not null
 
@@ -728,7 +1006,7 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinPlayerRelatedByPlayerOne(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinPlayerRelatedByPlayerOneId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -741,7 +1019,7 @@ abstract class BaseGamePeer
         $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
         PlayerPeer::addSelectColumns($criteria);
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
@@ -774,7 +1052,7 @@ abstract class BaseGamePeer
                 } // if obj2 already loaded
 
                 // Add the $obj1 (Game) to $obj2 (Player)
-                $obj2->addGameRelatedByPlayerOne($obj1);
+                $obj2->addGameRelatedByPlayerOneId($obj1);
 
             } // if joined row was not null
 
@@ -795,7 +1073,7 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinPlayerRelatedByPlayerTwo(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinPlayerRelatedByPlayerTwoId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -808,7 +1086,7 @@ abstract class BaseGamePeer
         $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
         PlayerPeer::addSelectColumns($criteria);
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
@@ -841,7 +1119,74 @@ abstract class BaseGamePeer
                 } // if obj2 already loaded
 
                 // Add the $obj1 (Game) to $obj2 (Player)
-                $obj2->addGameRelatedByPlayerTwo($obj1);
+                $obj2->addGameRelatedByPlayerTwoId($obj1);
+
+            } // if joined row was not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with their Card objects.
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinCardRelatedByShop(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol = GamePeer::NUM_HYDRATE_COLUMNS;
+        CardPeer::addSelectColumns($criteria);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if $obj1 already loaded
+
+            $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol);
+            if ($key2 !== null) {
+                $obj2 = CardPeer::getInstanceFromPool($key2);
+                if (!$obj2) {
+
+                    $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if obj2 already loaded
+
+                // Add the $obj1 (Game) to $obj2 (Card)
+                $obj2->addGameRelatedByShop($obj1);
 
             } // if joined row was not null
 
@@ -889,11 +1234,17 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -929,20 +1280,35 @@ abstract class BaseGamePeer
         GamePeer::addSelectColumns($criteria);
         $startcol2 = GamePeer::NUM_HYDRATE_COLUMNS;
 
+        CardPeer::addSelectColumns($criteria);
+        $startcol3 = $startcol2 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + CardPeer::NUM_HYDRATE_COLUMNS;
+
         TurnPeer::addSelectColumns($criteria);
-        $startcol3 = $startcol2 + TurnPeer::NUM_HYDRATE_COLUMNS;
+        $startcol5 = $startcol4 + TurnPeer::NUM_HYDRATE_COLUMNS;
 
         PlayerPeer::addSelectColumns($criteria);
-        $startcol4 = $startcol3 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+        $startcol6 = $startcol5 + PlayerPeer::NUM_HYDRATE_COLUMNS;
 
         PlayerPeer::addSelectColumns($criteria);
-        $startcol5 = $startcol4 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+        $startcol7 = $startcol6 + PlayerPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        CardPeer::addSelectColumns($criteria);
+        $startcol8 = $startcol7 + CardPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
@@ -961,58 +1327,112 @@ abstract class BaseGamePeer
                 GamePeer::addInstanceToPool($obj1, $key1);
             } // if obj1 already loaded
 
-            // Add objects for joined Turn rows
+            // Add objects for joined Card rows
 
-            $key2 = TurnPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+            $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol2);
             if ($key2 !== null) {
-                $obj2 = TurnPeer::getInstanceFromPool($key2);
+                $obj2 = CardPeer::getInstanceFromPool($key2);
                 if (!$obj2) {
 
-                    $cls = TurnPeer::getOMClass();
+                    $cls = CardPeer::getOMClass();
 
                     $obj2 = new $cls();
                     $obj2->hydrate($row, $startcol2);
-                    TurnPeer::addInstanceToPool($obj2, $key2);
+                    CardPeer::addInstanceToPool($obj2, $key2);
                 } // if obj2 loaded
 
-                // Add the $obj1 (Game) to the collection in $obj2 (Turn)
-                $obj2->addGameRelatedByLastTurn($obj1);
+                // Add the $obj1 (Game) to the collection in $obj2 (Card)
+                $obj2->addGameRelatedByDiscard($obj1);
             } // if joined row not null
 
-            // Add objects for joined Player rows
+            // Add objects for joined Card rows
 
-            $key3 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+            $key3 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol3);
             if ($key3 !== null) {
-                $obj3 = PlayerPeer::getInstanceFromPool($key3);
+                $obj3 = CardPeer::getInstanceFromPool($key3);
                 if (!$obj3) {
 
-                    $cls = PlayerPeer::getOMClass();
+                    $cls = CardPeer::getOMClass();
 
                     $obj3 = new $cls();
                     $obj3->hydrate($row, $startcol3);
-                    PlayerPeer::addInstanceToPool($obj3, $key3);
+                    CardPeer::addInstanceToPool($obj3, $key3);
                 } // if obj3 loaded
 
-                // Add the $obj1 (Game) to the collection in $obj3 (Player)
-                $obj3->addGameRelatedByPlayerOne($obj1);
+                // Add the $obj1 (Game) to the collection in $obj3 (Card)
+                $obj3->addGameRelatedByDraw($obj1);
+            } // if joined row not null
+
+            // Add objects for joined Turn rows
+
+            $key4 = TurnPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+            if ($key4 !== null) {
+                $obj4 = TurnPeer::getInstanceFromPool($key4);
+                if (!$obj4) {
+
+                    $cls = TurnPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    TurnPeer::addInstanceToPool($obj4, $key4);
+                } // if obj4 loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Turn)
+                $obj4->addGameRelatedByLastTurnId($obj1);
             } // if joined row not null
 
             // Add objects for joined Player rows
 
-            $key4 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol4);
-            if ($key4 !== null) {
-                $obj4 = PlayerPeer::getInstanceFromPool($key4);
-                if (!$obj4) {
+            $key5 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol5);
+            if ($key5 !== null) {
+                $obj5 = PlayerPeer::getInstanceFromPool($key5);
+                if (!$obj5) {
 
                     $cls = PlayerPeer::getOMClass();
 
-                    $obj4 = new $cls();
-                    $obj4->hydrate($row, $startcol4);
-                    PlayerPeer::addInstanceToPool($obj4, $key4);
-                } // if obj4 loaded
+                    $obj5 = new $cls();
+                    $obj5->hydrate($row, $startcol5);
+                    PlayerPeer::addInstanceToPool($obj5, $key5);
+                } // if obj5 loaded
 
-                // Add the $obj1 (Game) to the collection in $obj4 (Player)
-                $obj4->addGameRelatedByPlayerTwo($obj1);
+                // Add the $obj1 (Game) to the collection in $obj5 (Player)
+                $obj5->addGameRelatedByPlayerOneId($obj1);
+            } // if joined row not null
+
+            // Add objects for joined Player rows
+
+            $key6 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol6);
+            if ($key6 !== null) {
+                $obj6 = PlayerPeer::getInstanceFromPool($key6);
+                if (!$obj6) {
+
+                    $cls = PlayerPeer::getOMClass();
+
+                    $obj6 = new $cls();
+                    $obj6->hydrate($row, $startcol6);
+                    PlayerPeer::addInstanceToPool($obj6, $key6);
+                } // if obj6 loaded
+
+                // Add the $obj1 (Game) to the collection in $obj6 (Player)
+                $obj6->addGameRelatedByPlayerTwoId($obj1);
+            } // if joined row not null
+
+            // Add objects for joined Card rows
+
+            $key7 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol7);
+            if ($key7 !== null) {
+                $obj7 = CardPeer::getInstanceFromPool($key7);
+                if (!$obj7) {
+
+                    $cls = CardPeer::getOMClass();
+
+                    $obj7 = new $cls();
+                    $obj7->hydrate($row, $startcol7);
+                    CardPeer::addInstanceToPool($obj7, $key7);
+                } // if obj7 loaded
+
+                // Add the $obj1 (Game) to the collection in $obj7 (Card)
+                $obj7->addGameRelatedByShop($obj1);
             } // if joined row not null
 
             $results[] = $obj1;
@@ -1024,7 +1444,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related TurnRelatedByLastTurn table
+     * Returns the number of rows matching criteria, joining the related CardRelatedByDiscard table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -1032,7 +1452,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinAllExceptTurnRelatedByLastTurn(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinAllExceptCardRelatedByDiscard(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -1059,9 +1479,11 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -1077,7 +1499,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerOne table
+     * Returns the number of rows matching criteria, joining the related CardRelatedByDraw table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -1085,7 +1507,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinAllExceptPlayerRelatedByPlayerOne(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinAllExceptCardRelatedByDraw(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -1112,7 +1534,11 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -1128,7 +1554,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerTwo table
+     * Returns the number of rows matching criteria, joining the related TurnRelatedByLastTurnId table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -1136,7 +1562,7 @@ abstract class BaseGamePeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinAllExceptPlayerRelatedByPlayerTwo(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinAllExceptTurnRelatedByLastTurnId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -1163,7 +1589,15 @@ abstract class BaseGamePeer
             $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -1179,7 +1613,176 @@ abstract class BaseGamePeer
 
 
     /**
-     * Selects a collection of Game objects pre-filled with all related objects except TurnRelatedByLastTurn.
+     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerOneId table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinAllExceptPlayerRelatedByPlayerOneId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY should not affect count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Returns the number of rows matching criteria, joining the related PlayerRelatedByPlayerTwoId table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinAllExceptPlayerRelatedByPlayerTwoId(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY should not affect count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Returns the number of rows matching criteria, joining the related CardRelatedByShop table
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return int Number of matching rows.
+     */
+    public static function doCountJoinAllExceptCardRelatedByShop(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        // we're going to modify criteria, so copy it first
+        $criteria = clone $criteria;
+
+        // We need to set the primary table name, since in the case that there are no WHERE columns
+        // it will be impossible for the BasePeer::createSelectSql() method to determine which
+        // tables go into the FROM clause.
+        $criteria->setPrimaryTableName(GamePeer::TABLE_NAME);
+
+        if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
+            $criteria->setDistinct();
+        }
+
+        if (!$criteria->hasSelectClause()) {
+            GamePeer::addSelectColumns($criteria);
+        }
+
+        $criteria->clearOrderByColumns(); // ORDER BY should not affect count
+
+        // Set the correct dbName
+        $criteria->setDbName(GamePeer::DATABASE_NAME);
+
+        if ($con === null) {
+            $con = Propel::getConnection(GamePeer::DATABASE_NAME, Propel::CONNECTION_READ);
+        }
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $stmt = BasePeer::doCount($criteria, $con);
+
+        if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $count = (int) $row[0];
+        } else {
+            $count = 0; // no rows returned; we infer that means 0 matches.
+        }
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with all related objects except CardRelatedByDiscard.
      *
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
@@ -1188,7 +1791,7 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinAllExceptTurnRelatedByLastTurn(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinAllExceptCardRelatedByDiscard(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -1202,15 +1805,20 @@ abstract class BaseGamePeer
         GamePeer::addSelectColumns($criteria);
         $startcol2 = GamePeer::NUM_HYDRATE_COLUMNS;
 
-        PlayerPeer::addSelectColumns($criteria);
-        $startcol3 = $startcol2 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+        TurnPeer::addSelectColumns($criteria);
+        $startcol3 = $startcol2 + TurnPeer::NUM_HYDRATE_COLUMNS;
 
         PlayerPeer::addSelectColumns($criteria);
         $startcol4 = $startcol3 + PlayerPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::PLAYER_ONE, PlayerPeer::ID, $join_behavior);
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + PlayerPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::PLAYER_TWO, PlayerPeer::ID, $join_behavior);
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
 
         $stmt = BasePeer::doSelect($criteria, $con);
@@ -1230,22 +1838,22 @@ abstract class BaseGamePeer
                 GamePeer::addInstanceToPool($obj1, $key1);
             } // if obj1 already loaded
 
-                // Add objects for joined Player rows
+                // Add objects for joined Turn rows
 
-                $key2 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+                $key2 = TurnPeer::getPrimaryKeyHashFromRow($row, $startcol2);
                 if ($key2 !== null) {
-                    $obj2 = PlayerPeer::getInstanceFromPool($key2);
+                    $obj2 = TurnPeer::getInstanceFromPool($key2);
                     if (!$obj2) {
 
-                        $cls = PlayerPeer::getOMClass();
+                        $cls = TurnPeer::getOMClass();
 
                     $obj2 = new $cls();
                     $obj2->hydrate($row, $startcol2);
-                    PlayerPeer::addInstanceToPool($obj2, $key2);
+                    TurnPeer::addInstanceToPool($obj2, $key2);
                 } // if $obj2 already loaded
 
-                // Add the $obj1 (Game) to the collection in $obj2 (Player)
-                $obj2->addGameRelatedByPlayerOne($obj1);
+                // Add the $obj1 (Game) to the collection in $obj2 (Turn)
+                $obj2->addGameRelatedByLastTurnId($obj1);
 
             } // if joined row is not null
 
@@ -1264,7 +1872,26 @@ abstract class BaseGamePeer
                 } // if $obj3 already loaded
 
                 // Add the $obj1 (Game) to the collection in $obj3 (Player)
-                $obj3->addGameRelatedByPlayerTwo($obj1);
+                $obj3->addGameRelatedByPlayerOneId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key4 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = PlayerPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    PlayerPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Player)
+                $obj4->addGameRelatedByPlayerTwoId($obj1);
 
             } // if joined row is not null
 
@@ -1277,7 +1904,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Selects a collection of Game objects pre-filled with all related objects except PlayerRelatedByPlayerOne.
+     * Selects a collection of Game objects pre-filled with all related objects except CardRelatedByDraw.
      *
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
@@ -1286,7 +1913,7 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinAllExceptPlayerRelatedByPlayerOne(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinAllExceptCardRelatedByDraw(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -1303,7 +1930,17 @@ abstract class BaseGamePeer
         TurnPeer::addSelectColumns($criteria);
         $startcol3 = $startcol2 + TurnPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
 
         $stmt = BasePeer::doSelect($criteria, $con);
@@ -1338,7 +1975,45 @@ abstract class BaseGamePeer
                 } // if $obj2 already loaded
 
                 // Add the $obj1 (Game) to the collection in $obj2 (Turn)
-                $obj2->addGameRelatedByLastTurn($obj1);
+                $obj2->addGameRelatedByLastTurnId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key3 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+                if ($key3 !== null) {
+                    $obj3 = PlayerPeer::getInstanceFromPool($key3);
+                    if (!$obj3) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj3 = new $cls();
+                    $obj3->hydrate($row, $startcol3);
+                    PlayerPeer::addInstanceToPool($obj3, $key3);
+                } // if $obj3 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj3 (Player)
+                $obj3->addGameRelatedByPlayerOneId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key4 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = PlayerPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    PlayerPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Player)
+                $obj4->addGameRelatedByPlayerTwoId($obj1);
 
             } // if joined row is not null
 
@@ -1351,7 +2026,7 @@ abstract class BaseGamePeer
 
 
     /**
-     * Selects a collection of Game objects pre-filled with all related objects except PlayerRelatedByPlayerTwo.
+     * Selects a collection of Game objects pre-filled with all related objects except TurnRelatedByLastTurnId.
      *
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
@@ -1360,7 +2035,469 @@ abstract class BaseGamePeer
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinAllExceptPlayerRelatedByPlayerTwo(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinAllExceptTurnRelatedByLastTurnId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        // $criteria->getDbName() will return the same object if not set to another value
+        // so == check is okay and faster
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol2 = GamePeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol3 = $startcol2 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol6 = $startcol5 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol7 = $startcol6 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if obj1 already loaded
+
+                // Add objects for joined Card rows
+
+                $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+                if ($key2 !== null) {
+                    $obj2 = CardPeer::getInstanceFromPool($key2);
+                    if (!$obj2) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol2);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if $obj2 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj2 (Card)
+                $obj2->addGameRelatedByDiscard($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key3 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+                if ($key3 !== null) {
+                    $obj3 = CardPeer::getInstanceFromPool($key3);
+                    if (!$obj3) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj3 = new $cls();
+                    $obj3->hydrate($row, $startcol3);
+                    CardPeer::addInstanceToPool($obj3, $key3);
+                } // if $obj3 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj3 (Card)
+                $obj3->addGameRelatedByDraw($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key4 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = PlayerPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    PlayerPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Player)
+                $obj4->addGameRelatedByPlayerOneId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key5 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol5);
+                if ($key5 !== null) {
+                    $obj5 = PlayerPeer::getInstanceFromPool($key5);
+                    if (!$obj5) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj5 = new $cls();
+                    $obj5->hydrate($row, $startcol5);
+                    PlayerPeer::addInstanceToPool($obj5, $key5);
+                } // if $obj5 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj5 (Player)
+                $obj5->addGameRelatedByPlayerTwoId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key6 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol6);
+                if ($key6 !== null) {
+                    $obj6 = CardPeer::getInstanceFromPool($key6);
+                    if (!$obj6) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj6 = new $cls();
+                    $obj6->hydrate($row, $startcol6);
+                    CardPeer::addInstanceToPool($obj6, $key6);
+                } // if $obj6 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj6 (Card)
+                $obj6->addGameRelatedByShop($obj1);
+
+            } // if joined row is not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with all related objects except PlayerRelatedByPlayerOneId.
+     *
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinAllExceptPlayerRelatedByPlayerOneId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        // $criteria->getDbName() will return the same object if not set to another value
+        // so == check is okay and faster
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol2 = GamePeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol3 = $startcol2 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        TurnPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + TurnPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol6 = $startcol5 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if obj1 already loaded
+
+                // Add objects for joined Card rows
+
+                $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+                if ($key2 !== null) {
+                    $obj2 = CardPeer::getInstanceFromPool($key2);
+                    if (!$obj2) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol2);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if $obj2 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj2 (Card)
+                $obj2->addGameRelatedByDiscard($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key3 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+                if ($key3 !== null) {
+                    $obj3 = CardPeer::getInstanceFromPool($key3);
+                    if (!$obj3) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj3 = new $cls();
+                    $obj3->hydrate($row, $startcol3);
+                    CardPeer::addInstanceToPool($obj3, $key3);
+                } // if $obj3 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj3 (Card)
+                $obj3->addGameRelatedByDraw($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Turn rows
+
+                $key4 = TurnPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = TurnPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = TurnPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    TurnPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Turn)
+                $obj4->addGameRelatedByLastTurnId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key5 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol5);
+                if ($key5 !== null) {
+                    $obj5 = CardPeer::getInstanceFromPool($key5);
+                    if (!$obj5) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj5 = new $cls();
+                    $obj5->hydrate($row, $startcol5);
+                    CardPeer::addInstanceToPool($obj5, $key5);
+                } // if $obj5 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj5 (Card)
+                $obj5->addGameRelatedByShop($obj1);
+
+            } // if joined row is not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with all related objects except PlayerRelatedByPlayerTwoId.
+     *
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinAllExceptPlayerRelatedByPlayerTwoId(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $criteria = clone $criteria;
+
+        // Set the correct dbName if it has not been overridden
+        // $criteria->getDbName() will return the same object if not set to another value
+        // so == check is okay and faster
+        if ($criteria->getDbName() == Propel::getDefaultDB()) {
+            $criteria->setDbName(GamePeer::DATABASE_NAME);
+        }
+
+        GamePeer::addSelectColumns($criteria);
+        $startcol2 = GamePeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol3 = $startcol2 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        TurnPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + TurnPeer::NUM_HYDRATE_COLUMNS;
+
+        CardPeer::addSelectColumns($criteria);
+        $startcol6 = $startcol5 + CardPeer::NUM_HYDRATE_COLUMNS;
+
+        $criteria->addJoin(GamePeer::DISCARD, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::DRAW, CardPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::SHOP, CardPeer::ID, $join_behavior);
+
+
+        $stmt = BasePeer::doSelect($criteria, $con);
+        $results = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+            $key1 = GamePeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = GamePeer::getInstanceFromPool($key1))) {
+                // We no longer rehydrate the object, since this can cause data loss.
+                // See http://www.propelorm.org/ticket/509
+                // $obj1->hydrate($row, 0, true); // rehydrate
+            } else {
+                $cls = GamePeer::getOMClass();
+
+                $obj1 = new $cls();
+                $obj1->hydrate($row);
+                GamePeer::addInstanceToPool($obj1, $key1);
+            } // if obj1 already loaded
+
+                // Add objects for joined Card rows
+
+                $key2 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+                if ($key2 !== null) {
+                    $obj2 = CardPeer::getInstanceFromPool($key2);
+                    if (!$obj2) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj2 = new $cls();
+                    $obj2->hydrate($row, $startcol2);
+                    CardPeer::addInstanceToPool($obj2, $key2);
+                } // if $obj2 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj2 (Card)
+                $obj2->addGameRelatedByDiscard($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key3 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+                if ($key3 !== null) {
+                    $obj3 = CardPeer::getInstanceFromPool($key3);
+                    if (!$obj3) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj3 = new $cls();
+                    $obj3->hydrate($row, $startcol3);
+                    CardPeer::addInstanceToPool($obj3, $key3);
+                } // if $obj3 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj3 (Card)
+                $obj3->addGameRelatedByDraw($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Turn rows
+
+                $key4 = TurnPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = TurnPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = TurnPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    TurnPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Turn)
+                $obj4->addGameRelatedByLastTurnId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Card rows
+
+                $key5 = CardPeer::getPrimaryKeyHashFromRow($row, $startcol5);
+                if ($key5 !== null) {
+                    $obj5 = CardPeer::getInstanceFromPool($key5);
+                    if (!$obj5) {
+
+                        $cls = CardPeer::getOMClass();
+
+                    $obj5 = new $cls();
+                    $obj5->hydrate($row, $startcol5);
+                    CardPeer::addInstanceToPool($obj5, $key5);
+                } // if $obj5 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj5 (Card)
+                $obj5->addGameRelatedByShop($obj1);
+
+            } // if joined row is not null
+
+            $results[] = $obj1;
+        }
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
+
+    /**
+     * Selects a collection of Game objects pre-filled with all related objects except CardRelatedByShop.
+     *
+     * @param      Criteria  $criteria
+     * @param      PropelPDO $con
+     * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
+     * @return array           Array of Game objects.
+     * @throws PropelException Any exceptions caught during processing will be
+     *		 rethrown wrapped into a PropelException.
+     */
+    public static function doSelectJoinAllExceptCardRelatedByShop(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
@@ -1377,7 +2514,17 @@ abstract class BaseGamePeer
         TurnPeer::addSelectColumns($criteria);
         $startcol3 = $startcol2 + TurnPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(GamePeer::LAST_TURN, TurnPeer::ID, $join_behavior);
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol4 = $startcol3 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        PlayerPeer::addSelectColumns($criteria);
+        $startcol5 = $startcol4 + PlayerPeer::NUM_HYDRATE_COLUMNS;
+
+        $criteria->addJoin(GamePeer::LAST_TURN_ID, TurnPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_ONE_ID, PlayerPeer::ID, $join_behavior);
+
+        $criteria->addJoin(GamePeer::PLAYER_TWO_ID, PlayerPeer::ID, $join_behavior);
 
 
         $stmt = BasePeer::doSelect($criteria, $con);
@@ -1412,7 +2559,45 @@ abstract class BaseGamePeer
                 } // if $obj2 already loaded
 
                 // Add the $obj1 (Game) to the collection in $obj2 (Turn)
-                $obj2->addGameRelatedByLastTurn($obj1);
+                $obj2->addGameRelatedByLastTurnId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key3 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol3);
+                if ($key3 !== null) {
+                    $obj3 = PlayerPeer::getInstanceFromPool($key3);
+                    if (!$obj3) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj3 = new $cls();
+                    $obj3->hydrate($row, $startcol3);
+                    PlayerPeer::addInstanceToPool($obj3, $key3);
+                } // if $obj3 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj3 (Player)
+                $obj3->addGameRelatedByPlayerOneId($obj1);
+
+            } // if joined row is not null
+
+                // Add objects for joined Player rows
+
+                $key4 = PlayerPeer::getPrimaryKeyHashFromRow($row, $startcol4);
+                if ($key4 !== null) {
+                    $obj4 = PlayerPeer::getInstanceFromPool($key4);
+                    if (!$obj4) {
+
+                        $cls = PlayerPeer::getOMClass();
+
+                    $obj4 = new $cls();
+                    $obj4->hydrate($row, $startcol4);
+                    PlayerPeer::addInstanceToPool($obj4, $key4);
+                } // if $obj4 already loaded
+
+                // Add the $obj1 (Game) to the collection in $obj4 (Player)
+                $obj4->addGameRelatedByPlayerTwoId($obj1);
 
             } // if joined row is not null
 

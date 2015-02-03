@@ -2,15 +2,10 @@
 
 namespace Arcium\GameBundle\Model;
 
-use Arcium\GameBundle\Model\om\BaseTurn;
+use Arcium\GameBundle\Model\om\BaseCard;
 
-class Turn extends BaseTurn
+class Card extends BaseCard
 {
-    /*************************
-     * CARDS SET/GET FUNCTIONS
-     ************************/
-
-
     /**
      * @return array An array of cards in the format Xy
      */
@@ -20,8 +15,8 @@ class Turn extends BaseTurn
     }
 
     /**
-     * @param string $cards An array of cards in the format Xy
-     * @return Turn|void
+     * @param array $cards An array of cards in the format Xy
+     * @return Card|void
      */
     public function setCards($cards)
     {
@@ -30,5 +25,4 @@ class Turn extends BaseTurn
 
         return parent::setCards(serialize($cards));
     }
-
 }

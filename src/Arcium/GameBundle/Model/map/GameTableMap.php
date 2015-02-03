@@ -43,14 +43,12 @@ class GameTableMap extends TableMap
         $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, 10, null);
-        $this->addColumn('deck', 'Deck', 'LONGVARCHAR', false, null, null);
-        $this->addColumn('discard', 'Discard', 'LONGVARCHAR', false, null, null);
-        $this->addColumn('shop', 'Shop', 'LONGVARCHAR', false, null, null);
-        $this->addForeignKey('player_one', 'PlayerOne', 'INTEGER', 'players', 'id', true, 10, null);
-        $this->addColumn('player_one_hand', 'PlayerOneHand', 'LONGVARCHAR', false, null, null);
-        $this->addForeignKey('player_two', 'PlayerTwo', 'INTEGER', 'players', 'id', true, 10, null);
-        $this->addColumn('player_two_hand', 'PlayerTwoHand', 'LONGVARCHAR', false, null, null);
-        $this->addForeignKey('last_turn', 'LastTurn', 'INTEGER', 'turns', 'id', false, 10, null);
+        $this->addForeignKey('draw', 'Draw', 'INTEGER', 'cards', 'id', false, 10, null);
+        $this->addForeignKey('discard', 'Discard', 'INTEGER', 'cards', 'id', false, 10, null);
+        $this->addForeignKey('shop', 'Shop', 'INTEGER', 'cards', 'id', false, 10, null);
+        $this->addForeignKey('player_one_id', 'PlayerOneId', 'INTEGER', 'players', 'id', true, 10, null);
+        $this->addForeignKey('player_two_id', 'PlayerTwoId', 'INTEGER', 'players', 'id', true, 10, null);
+        $this->addForeignKey('last_turn_id', 'LastTurnId', 'INTEGER', 'turns', 'id', false, 10, null);
         // validators
     } // initialize()
 
@@ -59,9 +57,12 @@ class GameTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('TurnRelatedByLastTurn', 'Arcium\\GameBundle\\Model\\Turn', RelationMap::MANY_TO_ONE, array('last_turn' => 'id', ), null, 'CASCADE');
-        $this->addRelation('PlayerRelatedByPlayerOne', 'Arcium\\GameBundle\\Model\\Player', RelationMap::MANY_TO_ONE, array('player_one' => 'id', ), null, 'CASCADE');
-        $this->addRelation('PlayerRelatedByPlayerTwo', 'Arcium\\GameBundle\\Model\\Player', RelationMap::MANY_TO_ONE, array('player_two' => 'id', ), null, 'CASCADE');
+        $this->addRelation('CardRelatedByDiscard', 'Arcium\\GameBundle\\Model\\Card', RelationMap::MANY_TO_ONE, array('discard' => 'id', ), null, 'CASCADE');
+        $this->addRelation('CardRelatedByDraw', 'Arcium\\GameBundle\\Model\\Card', RelationMap::MANY_TO_ONE, array('draw' => 'id', ), null, 'CASCADE');
+        $this->addRelation('TurnRelatedByLastTurnId', 'Arcium\\GameBundle\\Model\\Turn', RelationMap::MANY_TO_ONE, array('last_turn_id' => 'id', ), null, 'CASCADE');
+        $this->addRelation('PlayerRelatedByPlayerOneId', 'Arcium\\GameBundle\\Model\\Player', RelationMap::MANY_TO_ONE, array('player_one_id' => 'id', ), null, 'CASCADE');
+        $this->addRelation('PlayerRelatedByPlayerTwoId', 'Arcium\\GameBundle\\Model\\Player', RelationMap::MANY_TO_ONE, array('player_two_id' => 'id', ), null, 'CASCADE');
+        $this->addRelation('CardRelatedByShop', 'Arcium\\GameBundle\\Model\\Card', RelationMap::MANY_TO_ONE, array('shop' => 'id', ), null, 'CASCADE');
         $this->addRelation('TurnRelatedByGameId', 'Arcium\\GameBundle\\Model\\Turn', RelationMap::ONE_TO_MANY, array('id' => 'game_id', ), null, 'CASCADE', 'TurnsRelatedByGameId');
     } // buildRelations()
 

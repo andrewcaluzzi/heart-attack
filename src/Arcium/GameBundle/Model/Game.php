@@ -7,159 +7,174 @@ use Arcium\GameBundle\Model;
 
 class Game extends BaseGame
 {
-
-    /************************
-     * DECK GET/SET FUNCTIONS
-     ***********************/
-
-
-    /**
-     * @return array An array of cards in the form Xy
-     */
-    public function getDeck()
+    private function createCardHand($playerId, $type)
     {
-        return unserialize(parent::getDeck());
+        $hand = new Card();
+        $hand->setGameId($this->getId());
+        $hand->setPlayerId($playerId);
+        $hand->setType($type);
+        $hand->save();
+
+        return $hand;
     }
 
-    /**
-     * @param array $cards An array of cards in the format Xy
-     * @return Game|void
-     */
-    public function setDeck($cards)
+    /*****************************
+     * LAST TURN GET/SET FUNCTIONS
+     ****************************/
+
+
+    public function getLastTurn()
+    {
+        return $this->getTurnRelatedByLastTurnId();
+    }
+
+    public function setLastTurn(Turn $turn)
+    {
+        return parent::setTurnRelatedByLastTurnId($turn);
+    }
+
+
+    /*****************************
+     * DRAW PILE GET/SET FUNCTIONS
+     ****************************/
+
+
+    public function getDraw()
+    {
+        $draw = parent::getCardRelatedByDraw();
+
+        if(!$draw)
+        {
+            $draw = $this->createCardHand(null, CardPeer::TYPE_PILE);
+            parent::setDraw($draw->getId());
+        }
+
+        return $draw;
+    }
+
+    public function setDraw($cards)
     {
         if(!is_array($cards))
             return;
 
-        return parent::setDeck(serialize($cards));
+        $draw = $this->getDraw();
+        $draw->setCards($cards);
+        $draw->save();
     }
 
 
-    /************************
-     * SHOP GET/SET FUNCTIONS
-     ***********************/
+    /********************************
+     * DISCARD PILE GET/SET FUNCTIONS
+     *******************************/
 
 
-    /**
-     * @return array An array of cards in the form Xy
-     */
-    public function getShop()
-    {
-        return unserialize(parent::getShop());
-    }
-
-    /**
-     * @param string $cards An array of cards in the format Xy
-     * @return Game|void
-     */
-    public function setShop($cards)
-    {
-        if(!is_array($cards))
-            return;
-
-        return parent::setShop(serialize($cards));
-    }
-
-
-    /***************************
-     * DISCARD GET/SET FUNCTIONS
-     **************************/
-
-
-    /**
-     * @return array An array of cards in the format Xy
-     */
     public function getDiscard()
     {
-        return unserialize(parent::getDiscard());
+        $discard = parent::getCardRelatedByDiscard();
+
+        if(!$discard)
+        {
+            $discard = $this->createCardHand(null, CardPeer::TYPE_PILE);
+            parent::setDiscard($discard->getId());
+        }
+
+        return $discard;
     }
 
-    /**
-     * @param string $cards An array of cards in the format Xy
-     * @return Game|void
-     */
     public function setDiscard($cards)
     {
         if(!is_array($cards))
             return;
 
-        return parent::setDiscard(serialize($cards));
+        $discard = $this->getDiscard();
+        $discard->setCards($cards);
+        $discard->save();
     }
 
 
-    /*************************
-     * LAST TURN GET FUNCTIONS
-     ************************/
+    /*****************************
+     * SHOP PILE GET/SET FUNCTIONS
+     ****************************/
 
 
-    /**
-     * @param Model\Turn $turn The Turn object
-     * @return Game|void
-     */
-    public function setLastTurn($turn)
+    public function getShop()
     {
-        if(!($turn instanceof Model\Turn))
+        $shop = parent::getCardRelatedByShop();
+
+        if(!$shop)
+        {
+            $shop = $this->createCardHand(null, CardPeer::TYPE_PILE);
+            parent::setShop($shop->getId());
+        }
+
+        return $shop;
+    }
+
+    public function setShop($cards)
+    {
+        if(!is_array($cards))
             return;
 
-        return $this->setLastTurn($turn->getId());
+        $shop = $this->getShop();
+        $shop->setCards($cards);
+        $shop->save();
     }
 
 
-    /*******************************
-     * PLAYER HAND GET/SET FUNCTIONS
-     ******************************/
+    /**************************************
+     * PLAYER OBJECT/HAND GET/SET FUNCTIONS
+     *************************************/
 
-    /**
-     * @return array An array of cards in the format Xy
-     */
+
+    private function findPlayerHand($playerId)
+    {
+        return CardQuery::create()
+            ->filterByGameId($this->getId())
+            ->filterByPlayerId($playerId)
+            ->filterByType(CardPeer::TYPE_HAND)
+            ->findOne();
+    }
+
+    private function getPlayerHand($playerId)
+    {
+        $hand = $this->findPlayerHand($playerId);
+
+        if(!$hand)
+            $hand = $this->createCardHand($playerId, CardPeer::TYPE_HAND);
+
+        return $hand;
+    }
+
     public function getPlayerOneHand()
     {
-        return unserialize(parent::getPlayerOneHand());
+        return $this->getPlayerHand($this->getPlayerOneId());
     }
 
-    /**
-     * @return array An array of cards in the format Xy
-     */
     public function getPlayerTwoHand()
     {
-        return unserialize(parent::getPlayerTwoHand());
+        return $this->getPlayerHand($this->getPlayerTwoId());
     }
 
-    /**
-     * @param string $cards An array of cards in the format Xy
-     * @return Game|void
-     */
-    public function setPlayerOneHand($cards)
+    public function setPlayerOneHand(array $cards)
     {
-        if(!is_array($cards))
-            return;
-
-        return parent::setPlayerOneHand(serialize($cards));
+        $hand = $this->getPlayerOneHand();
+        $hand->setCards($cards);
+        $hand->save();
     }
 
-    /**
-     * @param string $cards An array of cards in the format Xy
-     * @return Game|void
-     */
-    public function setPlayerTwoHand($cards)
+    public function setPlayerTwoHand(array $cards)
     {
-        if(!is_array($cards))
-            return;
-
-        return parent::setPlayerTwoHand(serialize($cards));
+        $hand = $this->getPlayerTwoHand();
+        $hand->setCards($cards);
+        $hand->save();
     }
-
-
-    /**********************
-     * PLAYER GET FUNCTIONS
-     *********************/
-
 
     /**
      * @return Player The game's player one object
      */
     public function getPlayerOneObject()
     {
-        return parent::getPlayerRelatedByPlayerOne();
+        return parent::getPlayerRelatedByPlayerOneId();
     }
 
     /**
@@ -167,6 +182,6 @@ class Game extends BaseGame
      */
     public function getPlayerTwoObject()
     {
-        return parent::getPlayerRelatedByPlayerTwo();
+        return parent::getPlayerRelatedByPlayerTwoId();
     }
 }

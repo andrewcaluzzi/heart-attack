@@ -1,8 +1,9 @@
 <?php
 
+
 namespace Arcium\GameBundle\Model;
 
-class Deck
+class CardCollection
 {
     const DECK_EMPTY = 'EMPTY';
 
@@ -18,8 +19,7 @@ class Deck
     }
 
     /**
-     * @param array $cards A card in the format Xy where X is the card name and y is the card suit
-     *                     eg. Ah = Ace of Hearts
+     * @param array $cards An array of cards in the format Xy, or a Card object
      */
     public function __construct(array $cards)
     {
@@ -28,7 +28,7 @@ class Deck
     }
 
     /**
-     * Shuffles the deck
+     * Shuffles the card collection
      */
     public function shuffle()
     {
@@ -37,8 +37,7 @@ class Deck
 
     /**
      * @param int $number The number of cards to draw
-     * @return array An array of cards in the format Xy where X is the card name and y is the card suit
-     *                eg. Ah = Ace of Hearts
+     * @return array An array of cards in the format Xy
      */
     public function draw($number)
     {
@@ -48,9 +47,6 @@ class Deck
 
         for($i = 0; $i < $number; $i++)
             $cards[] = array_shift($this->cards);
-
-        #if($card === null)
-        #    return self::DECK_EMPTY;
 
         return $cards;
     }

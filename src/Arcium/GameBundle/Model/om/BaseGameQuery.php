@@ -12,6 +12,7 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use Arcium\GameBundle\Model\Card;
 use Arcium\GameBundle\Model\Game;
 use Arcium\GameBundle\Model\GamePeer;
 use Arcium\GameBundle\Model\GameQuery;
@@ -20,40 +21,48 @@ use Arcium\GameBundle\Model\Turn;
 
 /**
  * @method GameQuery orderById($order = Criteria::ASC) Order by the id column
- * @method GameQuery orderByDeck($order = Criteria::ASC) Order by the deck column
+ * @method GameQuery orderByDraw($order = Criteria::ASC) Order by the draw column
  * @method GameQuery orderByDiscard($order = Criteria::ASC) Order by the discard column
  * @method GameQuery orderByShop($order = Criteria::ASC) Order by the shop column
- * @method GameQuery orderByPlayerOne($order = Criteria::ASC) Order by the player_one column
- * @method GameQuery orderByPlayerOneHand($order = Criteria::ASC) Order by the player_one_hand column
- * @method GameQuery orderByPlayerTwo($order = Criteria::ASC) Order by the player_two column
- * @method GameQuery orderByPlayerTwoHand($order = Criteria::ASC) Order by the player_two_hand column
- * @method GameQuery orderByLastTurn($order = Criteria::ASC) Order by the last_turn column
+ * @method GameQuery orderByPlayerOneId($order = Criteria::ASC) Order by the player_one_id column
+ * @method GameQuery orderByPlayerTwoId($order = Criteria::ASC) Order by the player_two_id column
+ * @method GameQuery orderByLastTurnId($order = Criteria::ASC) Order by the last_turn_id column
  *
  * @method GameQuery groupById() Group by the id column
- * @method GameQuery groupByDeck() Group by the deck column
+ * @method GameQuery groupByDraw() Group by the draw column
  * @method GameQuery groupByDiscard() Group by the discard column
  * @method GameQuery groupByShop() Group by the shop column
- * @method GameQuery groupByPlayerOne() Group by the player_one column
- * @method GameQuery groupByPlayerOneHand() Group by the player_one_hand column
- * @method GameQuery groupByPlayerTwo() Group by the player_two column
- * @method GameQuery groupByPlayerTwoHand() Group by the player_two_hand column
- * @method GameQuery groupByLastTurn() Group by the last_turn column
+ * @method GameQuery groupByPlayerOneId() Group by the player_one_id column
+ * @method GameQuery groupByPlayerTwoId() Group by the player_two_id column
+ * @method GameQuery groupByLastTurnId() Group by the last_turn_id column
  *
  * @method GameQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method GameQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method GameQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method GameQuery leftJoinTurnRelatedByLastTurn($relationAlias = null) Adds a LEFT JOIN clause to the query using the TurnRelatedByLastTurn relation
- * @method GameQuery rightJoinTurnRelatedByLastTurn($relationAlias = null) Adds a RIGHT JOIN clause to the query using the TurnRelatedByLastTurn relation
- * @method GameQuery innerJoinTurnRelatedByLastTurn($relationAlias = null) Adds a INNER JOIN clause to the query using the TurnRelatedByLastTurn relation
+ * @method GameQuery leftJoinCardRelatedByDiscard($relationAlias = null) Adds a LEFT JOIN clause to the query using the CardRelatedByDiscard relation
+ * @method GameQuery rightJoinCardRelatedByDiscard($relationAlias = null) Adds a RIGHT JOIN clause to the query using the CardRelatedByDiscard relation
+ * @method GameQuery innerJoinCardRelatedByDiscard($relationAlias = null) Adds a INNER JOIN clause to the query using the CardRelatedByDiscard relation
  *
- * @method GameQuery leftJoinPlayerRelatedByPlayerOne($relationAlias = null) Adds a LEFT JOIN clause to the query using the PlayerRelatedByPlayerOne relation
- * @method GameQuery rightJoinPlayerRelatedByPlayerOne($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PlayerRelatedByPlayerOne relation
- * @method GameQuery innerJoinPlayerRelatedByPlayerOne($relationAlias = null) Adds a INNER JOIN clause to the query using the PlayerRelatedByPlayerOne relation
+ * @method GameQuery leftJoinCardRelatedByDraw($relationAlias = null) Adds a LEFT JOIN clause to the query using the CardRelatedByDraw relation
+ * @method GameQuery rightJoinCardRelatedByDraw($relationAlias = null) Adds a RIGHT JOIN clause to the query using the CardRelatedByDraw relation
+ * @method GameQuery innerJoinCardRelatedByDraw($relationAlias = null) Adds a INNER JOIN clause to the query using the CardRelatedByDraw relation
  *
- * @method GameQuery leftJoinPlayerRelatedByPlayerTwo($relationAlias = null) Adds a LEFT JOIN clause to the query using the PlayerRelatedByPlayerTwo relation
- * @method GameQuery rightJoinPlayerRelatedByPlayerTwo($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PlayerRelatedByPlayerTwo relation
- * @method GameQuery innerJoinPlayerRelatedByPlayerTwo($relationAlias = null) Adds a INNER JOIN clause to the query using the PlayerRelatedByPlayerTwo relation
+ * @method GameQuery leftJoinTurnRelatedByLastTurnId($relationAlias = null) Adds a LEFT JOIN clause to the query using the TurnRelatedByLastTurnId relation
+ * @method GameQuery rightJoinTurnRelatedByLastTurnId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the TurnRelatedByLastTurnId relation
+ * @method GameQuery innerJoinTurnRelatedByLastTurnId($relationAlias = null) Adds a INNER JOIN clause to the query using the TurnRelatedByLastTurnId relation
+ *
+ * @method GameQuery leftJoinPlayerRelatedByPlayerOneId($relationAlias = null) Adds a LEFT JOIN clause to the query using the PlayerRelatedByPlayerOneId relation
+ * @method GameQuery rightJoinPlayerRelatedByPlayerOneId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PlayerRelatedByPlayerOneId relation
+ * @method GameQuery innerJoinPlayerRelatedByPlayerOneId($relationAlias = null) Adds a INNER JOIN clause to the query using the PlayerRelatedByPlayerOneId relation
+ *
+ * @method GameQuery leftJoinPlayerRelatedByPlayerTwoId($relationAlias = null) Adds a LEFT JOIN clause to the query using the PlayerRelatedByPlayerTwoId relation
+ * @method GameQuery rightJoinPlayerRelatedByPlayerTwoId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PlayerRelatedByPlayerTwoId relation
+ * @method GameQuery innerJoinPlayerRelatedByPlayerTwoId($relationAlias = null) Adds a INNER JOIN clause to the query using the PlayerRelatedByPlayerTwoId relation
+ *
+ * @method GameQuery leftJoinCardRelatedByShop($relationAlias = null) Adds a LEFT JOIN clause to the query using the CardRelatedByShop relation
+ * @method GameQuery rightJoinCardRelatedByShop($relationAlias = null) Adds a RIGHT JOIN clause to the query using the CardRelatedByShop relation
+ * @method GameQuery innerJoinCardRelatedByShop($relationAlias = null) Adds a INNER JOIN clause to the query using the CardRelatedByShop relation
  *
  * @method GameQuery leftJoinTurnRelatedByGameId($relationAlias = null) Adds a LEFT JOIN clause to the query using the TurnRelatedByGameId relation
  * @method GameQuery rightJoinTurnRelatedByGameId($relationAlias = null) Adds a RIGHT JOIN clause to the query using the TurnRelatedByGameId relation
@@ -62,24 +71,20 @@ use Arcium\GameBundle\Model\Turn;
  * @method Game findOne(PropelPDO $con = null) Return the first Game matching the query
  * @method Game findOneOrCreate(PropelPDO $con = null) Return the first Game matching the query, or a new Game object populated from the query conditions when no match is found
  *
- * @method Game findOneByDeck(string $deck) Return the first Game filtered by the deck column
- * @method Game findOneByDiscard(string $discard) Return the first Game filtered by the discard column
- * @method Game findOneByShop(string $shop) Return the first Game filtered by the shop column
- * @method Game findOneByPlayerOne(int $player_one) Return the first Game filtered by the player_one column
- * @method Game findOneByPlayerOneHand(string $player_one_hand) Return the first Game filtered by the player_one_hand column
- * @method Game findOneByPlayerTwo(int $player_two) Return the first Game filtered by the player_two column
- * @method Game findOneByPlayerTwoHand(string $player_two_hand) Return the first Game filtered by the player_two_hand column
- * @method Game findOneByLastTurn(int $last_turn) Return the first Game filtered by the last_turn column
+ * @method Game findOneByDraw(int $draw) Return the first Game filtered by the draw column
+ * @method Game findOneByDiscard(int $discard) Return the first Game filtered by the discard column
+ * @method Game findOneByShop(int $shop) Return the first Game filtered by the shop column
+ * @method Game findOneByPlayerOneId(int $player_one_id) Return the first Game filtered by the player_one_id column
+ * @method Game findOneByPlayerTwoId(int $player_two_id) Return the first Game filtered by the player_two_id column
+ * @method Game findOneByLastTurnId(int $last_turn_id) Return the first Game filtered by the last_turn_id column
  *
  * @method array findById(int $id) Return Game objects filtered by the id column
- * @method array findByDeck(string $deck) Return Game objects filtered by the deck column
- * @method array findByDiscard(string $discard) Return Game objects filtered by the discard column
- * @method array findByShop(string $shop) Return Game objects filtered by the shop column
- * @method array findByPlayerOne(int $player_one) Return Game objects filtered by the player_one column
- * @method array findByPlayerOneHand(string $player_one_hand) Return Game objects filtered by the player_one_hand column
- * @method array findByPlayerTwo(int $player_two) Return Game objects filtered by the player_two column
- * @method array findByPlayerTwoHand(string $player_two_hand) Return Game objects filtered by the player_two_hand column
- * @method array findByLastTurn(int $last_turn) Return Game objects filtered by the last_turn column
+ * @method array findByDraw(int $draw) Return Game objects filtered by the draw column
+ * @method array findByDiscard(int $discard) Return Game objects filtered by the discard column
+ * @method array findByShop(int $shop) Return Game objects filtered by the shop column
+ * @method array findByPlayerOneId(int $player_one_id) Return Game objects filtered by the player_one_id column
+ * @method array findByPlayerTwoId(int $player_two_id) Return Game objects filtered by the player_two_id column
+ * @method array findByLastTurnId(int $last_turn_id) Return Game objects filtered by the last_turn_id column
  */
 abstract class BaseGameQuery extends ModelCriteria
 {
@@ -185,7 +190,7 @@ abstract class BaseGameQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `id`, `deck`, `discard`, `shop`, `player_one`, `player_one_hand`, `player_two`, `player_two_hand`, `last_turn` FROM `games` WHERE `id` = :p0';
+        $sql = 'SELECT `id`, `draw`, `discard`, `shop`, `player_one_id`, `player_two_id`, `last_turn_id` FROM `games` WHERE `id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -317,32 +322,47 @@ abstract class BaseGameQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the deck column
+     * Filter the query on the draw column
      *
      * Example usage:
      * <code>
-     * $query->filterByDeck('fooValue');   // WHERE deck = 'fooValue'
-     * $query->filterByDeck('%fooValue%'); // WHERE deck LIKE '%fooValue%'
+     * $query->filterByDraw(1234); // WHERE draw = 1234
+     * $query->filterByDraw(array(12, 34)); // WHERE draw IN (12, 34)
+     * $query->filterByDraw(array('min' => 12)); // WHERE draw >= 12
+     * $query->filterByDraw(array('max' => 12)); // WHERE draw <= 12
      * </code>
      *
-     * @param     string $deck The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
+     * @see       filterByCardRelatedByDraw()
+     *
+     * @param     mixed $draw The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function filterByDeck($deck = null, $comparison = null)
+    public function filterByDraw($draw = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($deck)) {
+        if (is_array($draw)) {
+            $useMinMax = false;
+            if (isset($draw['min'])) {
+                $this->addUsingAlias(GamePeer::DRAW, $draw['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($draw['max'])) {
+                $this->addUsingAlias(GamePeer::DRAW, $draw['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $deck)) {
-                $deck = str_replace('*', '%', $deck);
-                $comparison = Criteria::LIKE;
             }
         }
 
-        return $this->addUsingAlias(GamePeer::DECK, $deck, $comparison);
+        return $this->addUsingAlias(GamePeer::DRAW, $draw, $comparison);
     }
 
     /**
@@ -350,24 +370,39 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByDiscard('fooValue');   // WHERE discard = 'fooValue'
-     * $query->filterByDiscard('%fooValue%'); // WHERE discard LIKE '%fooValue%'
+     * $query->filterByDiscard(1234); // WHERE discard = 1234
+     * $query->filterByDiscard(array(12, 34)); // WHERE discard IN (12, 34)
+     * $query->filterByDiscard(array('min' => 12)); // WHERE discard >= 12
+     * $query->filterByDiscard(array('max' => 12)); // WHERE discard <= 12
      * </code>
      *
-     * @param     string $discard The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
+     * @see       filterByCardRelatedByDiscard()
+     *
+     * @param     mixed $discard The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return GameQuery The current query, for fluid interface
      */
     public function filterByDiscard($discard = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($discard)) {
+        if (is_array($discard)) {
+            $useMinMax = false;
+            if (isset($discard['min'])) {
+                $this->addUsingAlias(GamePeer::DISCARD, $discard['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($discard['max'])) {
+                $this->addUsingAlias(GamePeer::DISCARD, $discard['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $discard)) {
-                $discard = str_replace('*', '%', $discard);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -379,24 +414,39 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * Example usage:
      * <code>
-     * $query->filterByShop('fooValue');   // WHERE shop = 'fooValue'
-     * $query->filterByShop('%fooValue%'); // WHERE shop LIKE '%fooValue%'
+     * $query->filterByShop(1234); // WHERE shop = 1234
+     * $query->filterByShop(array(12, 34)); // WHERE shop IN (12, 34)
+     * $query->filterByShop(array('min' => 12)); // WHERE shop >= 12
+     * $query->filterByShop(array('max' => 12)); // WHERE shop <= 12
      * </code>
      *
-     * @param     string $shop The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
+     * @see       filterByCardRelatedByShop()
+     *
+     * @param     mixed $shop The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return GameQuery The current query, for fluid interface
      */
     public function filterByShop($shop = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($shop)) {
+        if (is_array($shop)) {
+            $useMinMax = false;
+            if (isset($shop['min'])) {
+                $this->addUsingAlias(GamePeer::SHOP, $shop['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($shop['max'])) {
+                $this->addUsingAlias(GamePeer::SHOP, $shop['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $shop)) {
-                $shop = str_replace('*', '%', $shop);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -404,19 +454,19 @@ abstract class BaseGameQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the player_one column
+     * Filter the query on the player_one_id column
      *
      * Example usage:
      * <code>
-     * $query->filterByPlayerOne(1234); // WHERE player_one = 1234
-     * $query->filterByPlayerOne(array(12, 34)); // WHERE player_one IN (12, 34)
-     * $query->filterByPlayerOne(array('min' => 12)); // WHERE player_one >= 12
-     * $query->filterByPlayerOne(array('max' => 12)); // WHERE player_one <= 12
+     * $query->filterByPlayerOneId(1234); // WHERE player_one_id = 1234
+     * $query->filterByPlayerOneId(array(12, 34)); // WHERE player_one_id IN (12, 34)
+     * $query->filterByPlayerOneId(array('min' => 12)); // WHERE player_one_id >= 12
+     * $query->filterByPlayerOneId(array('max' => 12)); // WHERE player_one_id <= 12
      * </code>
      *
-     * @see       filterByPlayerRelatedByPlayerOne()
+     * @see       filterByPlayerRelatedByPlayerOneId()
      *
-     * @param     mixed $playerOne The value to use as filter.
+     * @param     mixed $playerOneId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -424,16 +474,16 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function filterByPlayerOne($playerOne = null, $comparison = null)
+    public function filterByPlayerOneId($playerOneId = null, $comparison = null)
     {
-        if (is_array($playerOne)) {
+        if (is_array($playerOneId)) {
             $useMinMax = false;
-            if (isset($playerOne['min'])) {
-                $this->addUsingAlias(GamePeer::PLAYER_ONE, $playerOne['min'], Criteria::GREATER_EQUAL);
+            if (isset($playerOneId['min'])) {
+                $this->addUsingAlias(GamePeer::PLAYER_ONE_ID, $playerOneId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($playerOne['max'])) {
-                $this->addUsingAlias(GamePeer::PLAYER_ONE, $playerOne['max'], Criteria::LESS_EQUAL);
+            if (isset($playerOneId['max'])) {
+                $this->addUsingAlias(GamePeer::PLAYER_ONE_ID, $playerOneId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -444,52 +494,23 @@ abstract class BaseGameQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(GamePeer::PLAYER_ONE, $playerOne, $comparison);
+        return $this->addUsingAlias(GamePeer::PLAYER_ONE_ID, $playerOneId, $comparison);
     }
 
     /**
-     * Filter the query on the player_one_hand column
+     * Filter the query on the player_two_id column
      *
      * Example usage:
      * <code>
-     * $query->filterByPlayerOneHand('fooValue');   // WHERE player_one_hand = 'fooValue'
-     * $query->filterByPlayerOneHand('%fooValue%'); // WHERE player_one_hand LIKE '%fooValue%'
+     * $query->filterByPlayerTwoId(1234); // WHERE player_two_id = 1234
+     * $query->filterByPlayerTwoId(array(12, 34)); // WHERE player_two_id IN (12, 34)
+     * $query->filterByPlayerTwoId(array('min' => 12)); // WHERE player_two_id >= 12
+     * $query->filterByPlayerTwoId(array('max' => 12)); // WHERE player_two_id <= 12
      * </code>
      *
-     * @param     string $playerOneHand The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     * @see       filterByPlayerRelatedByPlayerTwoId()
      *
-     * @return GameQuery The current query, for fluid interface
-     */
-    public function filterByPlayerOneHand($playerOneHand = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($playerOneHand)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $playerOneHand)) {
-                $playerOneHand = str_replace('*', '%', $playerOneHand);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(GamePeer::PLAYER_ONE_HAND, $playerOneHand, $comparison);
-    }
-
-    /**
-     * Filter the query on the player_two column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByPlayerTwo(1234); // WHERE player_two = 1234
-     * $query->filterByPlayerTwo(array(12, 34)); // WHERE player_two IN (12, 34)
-     * $query->filterByPlayerTwo(array('min' => 12)); // WHERE player_two >= 12
-     * $query->filterByPlayerTwo(array('max' => 12)); // WHERE player_two <= 12
-     * </code>
-     *
-     * @see       filterByPlayerRelatedByPlayerTwo()
-     *
-     * @param     mixed $playerTwo The value to use as filter.
+     * @param     mixed $playerTwoId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -497,16 +518,16 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function filterByPlayerTwo($playerTwo = null, $comparison = null)
+    public function filterByPlayerTwoId($playerTwoId = null, $comparison = null)
     {
-        if (is_array($playerTwo)) {
+        if (is_array($playerTwoId)) {
             $useMinMax = false;
-            if (isset($playerTwo['min'])) {
-                $this->addUsingAlias(GamePeer::PLAYER_TWO, $playerTwo['min'], Criteria::GREATER_EQUAL);
+            if (isset($playerTwoId['min'])) {
+                $this->addUsingAlias(GamePeer::PLAYER_TWO_ID, $playerTwoId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($playerTwo['max'])) {
-                $this->addUsingAlias(GamePeer::PLAYER_TWO, $playerTwo['max'], Criteria::LESS_EQUAL);
+            if (isset($playerTwoId['max'])) {
+                $this->addUsingAlias(GamePeer::PLAYER_TWO_ID, $playerTwoId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -517,52 +538,23 @@ abstract class BaseGameQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(GamePeer::PLAYER_TWO, $playerTwo, $comparison);
+        return $this->addUsingAlias(GamePeer::PLAYER_TWO_ID, $playerTwoId, $comparison);
     }
 
     /**
-     * Filter the query on the player_two_hand column
+     * Filter the query on the last_turn_id column
      *
      * Example usage:
      * <code>
-     * $query->filterByPlayerTwoHand('fooValue');   // WHERE player_two_hand = 'fooValue'
-     * $query->filterByPlayerTwoHand('%fooValue%'); // WHERE player_two_hand LIKE '%fooValue%'
+     * $query->filterByLastTurnId(1234); // WHERE last_turn_id = 1234
+     * $query->filterByLastTurnId(array(12, 34)); // WHERE last_turn_id IN (12, 34)
+     * $query->filterByLastTurnId(array('min' => 12)); // WHERE last_turn_id >= 12
+     * $query->filterByLastTurnId(array('max' => 12)); // WHERE last_turn_id <= 12
      * </code>
      *
-     * @param     string $playerTwoHand The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     * @see       filterByTurnRelatedByLastTurnId()
      *
-     * @return GameQuery The current query, for fluid interface
-     */
-    public function filterByPlayerTwoHand($playerTwoHand = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($playerTwoHand)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $playerTwoHand)) {
-                $playerTwoHand = str_replace('*', '%', $playerTwoHand);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(GamePeer::PLAYER_TWO_HAND, $playerTwoHand, $comparison);
-    }
-
-    /**
-     * Filter the query on the last_turn column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByLastTurn(1234); // WHERE last_turn = 1234
-     * $query->filterByLastTurn(array(12, 34)); // WHERE last_turn IN (12, 34)
-     * $query->filterByLastTurn(array('min' => 12)); // WHERE last_turn >= 12
-     * $query->filterByLastTurn(array('max' => 12)); // WHERE last_turn <= 12
-     * </code>
-     *
-     * @see       filterByTurnRelatedByLastTurn()
-     *
-     * @param     mixed $lastTurn The value to use as filter.
+     * @param     mixed $lastTurnId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -570,16 +562,16 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function filterByLastTurn($lastTurn = null, $comparison = null)
+    public function filterByLastTurnId($lastTurnId = null, $comparison = null)
     {
-        if (is_array($lastTurn)) {
+        if (is_array($lastTurnId)) {
             $useMinMax = false;
-            if (isset($lastTurn['min'])) {
-                $this->addUsingAlias(GamePeer::LAST_TURN, $lastTurn['min'], Criteria::GREATER_EQUAL);
+            if (isset($lastTurnId['min'])) {
+                $this->addUsingAlias(GamePeer::LAST_TURN_ID, $lastTurnId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($lastTurn['max'])) {
-                $this->addUsingAlias(GamePeer::LAST_TURN, $lastTurn['max'], Criteria::LESS_EQUAL);
+            if (isset($lastTurnId['max'])) {
+                $this->addUsingAlias(GamePeer::LAST_TURN_ID, $lastTurnId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -590,7 +582,159 @@ abstract class BaseGameQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(GamePeer::LAST_TURN, $lastTurn, $comparison);
+        return $this->addUsingAlias(GamePeer::LAST_TURN_ID, $lastTurnId, $comparison);
+    }
+
+    /**
+     * Filter the query by a related Card object
+     *
+     * @param   Card|PropelObjectCollection $card The related object(s) to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 GameQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByCardRelatedByDiscard($card, $comparison = null)
+    {
+        if ($card instanceof Card) {
+            return $this
+                ->addUsingAlias(GamePeer::DISCARD, $card->getId(), $comparison);
+        } elseif ($card instanceof PropelObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(GamePeer::DISCARD, $card->toKeyValue('PrimaryKey', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByCardRelatedByDiscard() only accepts arguments of type Card or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the CardRelatedByDiscard relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return GameQuery The current query, for fluid interface
+     */
+    public function joinCardRelatedByDiscard($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('CardRelatedByDiscard');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'CardRelatedByDiscard');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the CardRelatedByDiscard relation Card object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\CardQuery A secondary query class using the current class as primary query
+     */
+    public function useCardRelatedByDiscardQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinCardRelatedByDiscard($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'CardRelatedByDiscard', '\Arcium\GameBundle\Model\CardQuery');
+    }
+
+    /**
+     * Filter the query by a related Card object
+     *
+     * @param   Card|PropelObjectCollection $card The related object(s) to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 GameQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByCardRelatedByDraw($card, $comparison = null)
+    {
+        if ($card instanceof Card) {
+            return $this
+                ->addUsingAlias(GamePeer::DRAW, $card->getId(), $comparison);
+        } elseif ($card instanceof PropelObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(GamePeer::DRAW, $card->toKeyValue('PrimaryKey', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByCardRelatedByDraw() only accepts arguments of type Card or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the CardRelatedByDraw relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return GameQuery The current query, for fluid interface
+     */
+    public function joinCardRelatedByDraw($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('CardRelatedByDraw');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'CardRelatedByDraw');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the CardRelatedByDraw relation Card object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\CardQuery A secondary query class using the current class as primary query
+     */
+    public function useCardRelatedByDrawQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinCardRelatedByDraw($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'CardRelatedByDraw', '\Arcium\GameBundle\Model\CardQuery');
     }
 
     /**
@@ -602,35 +746,35 @@ abstract class BaseGameQuery extends ModelCriteria
      * @return                 GameQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
-    public function filterByTurnRelatedByLastTurn($turn, $comparison = null)
+    public function filterByTurnRelatedByLastTurnId($turn, $comparison = null)
     {
         if ($turn instanceof Turn) {
             return $this
-                ->addUsingAlias(GamePeer::LAST_TURN, $turn->getId(), $comparison);
+                ->addUsingAlias(GamePeer::LAST_TURN_ID, $turn->getId(), $comparison);
         } elseif ($turn instanceof PropelObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(GamePeer::LAST_TURN, $turn->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(GamePeer::LAST_TURN_ID, $turn->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
-            throw new PropelException('filterByTurnRelatedByLastTurn() only accepts arguments of type Turn or PropelCollection');
+            throw new PropelException('filterByTurnRelatedByLastTurnId() only accepts arguments of type Turn or PropelCollection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the TurnRelatedByLastTurn relation
+     * Adds a JOIN clause to the query using the TurnRelatedByLastTurnId relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function joinTurnRelatedByLastTurn($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinTurnRelatedByLastTurnId($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('TurnRelatedByLastTurn');
+        $relationMap = $tableMap->getRelation('TurnRelatedByLastTurnId');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -645,14 +789,14 @@ abstract class BaseGameQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'TurnRelatedByLastTurn');
+            $this->addJoinObject($join, 'TurnRelatedByLastTurnId');
         }
 
         return $this;
     }
 
     /**
-     * Use the TurnRelatedByLastTurn relation Turn object
+     * Use the TurnRelatedByLastTurnId relation Turn object
      *
      * @see       useQuery()
      *
@@ -662,11 +806,11 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return   \Arcium\GameBundle\Model\TurnQuery A secondary query class using the current class as primary query
      */
-    public function useTurnRelatedByLastTurnQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useTurnRelatedByLastTurnIdQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
     {
         return $this
-            ->joinTurnRelatedByLastTurn($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'TurnRelatedByLastTurn', '\Arcium\GameBundle\Model\TurnQuery');
+            ->joinTurnRelatedByLastTurnId($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'TurnRelatedByLastTurnId', '\Arcium\GameBundle\Model\TurnQuery');
     }
 
     /**
@@ -678,35 +822,35 @@ abstract class BaseGameQuery extends ModelCriteria
      * @return                 GameQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
-    public function filterByPlayerRelatedByPlayerOne($player, $comparison = null)
+    public function filterByPlayerRelatedByPlayerOneId($player, $comparison = null)
     {
         if ($player instanceof Player) {
             return $this
-                ->addUsingAlias(GamePeer::PLAYER_ONE, $player->getId(), $comparison);
+                ->addUsingAlias(GamePeer::PLAYER_ONE_ID, $player->getId(), $comparison);
         } elseif ($player instanceof PropelObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(GamePeer::PLAYER_ONE, $player->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(GamePeer::PLAYER_ONE_ID, $player->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
-            throw new PropelException('filterByPlayerRelatedByPlayerOne() only accepts arguments of type Player or PropelCollection');
+            throw new PropelException('filterByPlayerRelatedByPlayerOneId() only accepts arguments of type Player or PropelCollection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the PlayerRelatedByPlayerOne relation
+     * Adds a JOIN clause to the query using the PlayerRelatedByPlayerOneId relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function joinPlayerRelatedByPlayerOne($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinPlayerRelatedByPlayerOneId($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('PlayerRelatedByPlayerOne');
+        $relationMap = $tableMap->getRelation('PlayerRelatedByPlayerOneId');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -721,14 +865,14 @@ abstract class BaseGameQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'PlayerRelatedByPlayerOne');
+            $this->addJoinObject($join, 'PlayerRelatedByPlayerOneId');
         }
 
         return $this;
     }
 
     /**
-     * Use the PlayerRelatedByPlayerOne relation Player object
+     * Use the PlayerRelatedByPlayerOneId relation Player object
      *
      * @see       useQuery()
      *
@@ -738,11 +882,11 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return   \Arcium\GameBundle\Model\PlayerQuery A secondary query class using the current class as primary query
      */
-    public function usePlayerRelatedByPlayerOneQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function usePlayerRelatedByPlayerOneIdQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinPlayerRelatedByPlayerOne($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'PlayerRelatedByPlayerOne', '\Arcium\GameBundle\Model\PlayerQuery');
+            ->joinPlayerRelatedByPlayerOneId($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'PlayerRelatedByPlayerOneId', '\Arcium\GameBundle\Model\PlayerQuery');
     }
 
     /**
@@ -754,35 +898,35 @@ abstract class BaseGameQuery extends ModelCriteria
      * @return                 GameQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
-    public function filterByPlayerRelatedByPlayerTwo($player, $comparison = null)
+    public function filterByPlayerRelatedByPlayerTwoId($player, $comparison = null)
     {
         if ($player instanceof Player) {
             return $this
-                ->addUsingAlias(GamePeer::PLAYER_TWO, $player->getId(), $comparison);
+                ->addUsingAlias(GamePeer::PLAYER_TWO_ID, $player->getId(), $comparison);
         } elseif ($player instanceof PropelObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(GamePeer::PLAYER_TWO, $player->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(GamePeer::PLAYER_TWO_ID, $player->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
-            throw new PropelException('filterByPlayerRelatedByPlayerTwo() only accepts arguments of type Player or PropelCollection');
+            throw new PropelException('filterByPlayerRelatedByPlayerTwoId() only accepts arguments of type Player or PropelCollection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the PlayerRelatedByPlayerTwo relation
+     * Adds a JOIN clause to the query using the PlayerRelatedByPlayerTwoId relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return GameQuery The current query, for fluid interface
      */
-    public function joinPlayerRelatedByPlayerTwo($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinPlayerRelatedByPlayerTwoId($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('PlayerRelatedByPlayerTwo');
+        $relationMap = $tableMap->getRelation('PlayerRelatedByPlayerTwoId');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -797,14 +941,14 @@ abstract class BaseGameQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'PlayerRelatedByPlayerTwo');
+            $this->addJoinObject($join, 'PlayerRelatedByPlayerTwoId');
         }
 
         return $this;
     }
 
     /**
-     * Use the PlayerRelatedByPlayerTwo relation Player object
+     * Use the PlayerRelatedByPlayerTwoId relation Player object
      *
      * @see       useQuery()
      *
@@ -814,11 +958,87 @@ abstract class BaseGameQuery extends ModelCriteria
      *
      * @return   \Arcium\GameBundle\Model\PlayerQuery A secondary query class using the current class as primary query
      */
-    public function usePlayerRelatedByPlayerTwoQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function usePlayerRelatedByPlayerTwoIdQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinPlayerRelatedByPlayerTwo($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'PlayerRelatedByPlayerTwo', '\Arcium\GameBundle\Model\PlayerQuery');
+            ->joinPlayerRelatedByPlayerTwoId($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'PlayerRelatedByPlayerTwoId', '\Arcium\GameBundle\Model\PlayerQuery');
+    }
+
+    /**
+     * Filter the query by a related Card object
+     *
+     * @param   Card|PropelObjectCollection $card The related object(s) to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 GameQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByCardRelatedByShop($card, $comparison = null)
+    {
+        if ($card instanceof Card) {
+            return $this
+                ->addUsingAlias(GamePeer::SHOP, $card->getId(), $comparison);
+        } elseif ($card instanceof PropelObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(GamePeer::SHOP, $card->toKeyValue('PrimaryKey', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByCardRelatedByShop() only accepts arguments of type Card or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the CardRelatedByShop relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return GameQuery The current query, for fluid interface
+     */
+    public function joinCardRelatedByShop($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('CardRelatedByShop');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'CardRelatedByShop');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the CardRelatedByShop relation Card object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \Arcium\GameBundle\Model\CardQuery A secondary query class using the current class as primary query
+     */
+    public function useCardRelatedByShopQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinCardRelatedByShop($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'CardRelatedByShop', '\Arcium\GameBundle\Model\CardQuery');
     }
 
     /**
